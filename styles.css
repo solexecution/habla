@@ -151,6 +151,8 @@ header.top { display: flex; align-items: center; gap: 12px; padding: 6px 2px 16p
 .row-text b { font-size: .98rem; }
 .row-text p { margin: 3px 0 0; color: var(--muted); font-size: .82rem; }
 .rem-note { margin: 12px 0 0; color: var(--muted); font-size: .8rem; }
+.offline-badge { flex: 0 0 auto; font-weight: 700; font-size: .82rem; color: var(--good); }
+.offline-badge.pending { color: var(--muted); }
 #rem-time {
   font: inherit; font-weight: 700; padding: 9px 12px; border-radius: 11px;
   border: 1px solid var(--line); background: var(--bg-soft); color: var(--text); color-scheme: light dark;

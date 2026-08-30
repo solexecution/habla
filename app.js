@@ -705,7 +705,7 @@
   on($("browse-back"), "click", renderBrowse);
 
   // ── More / settings ──────────────────────────────────────
-  function renderMore() { renderReminder(); }
+  function renderMore() { renderReminder(); updateOfflineUI(); }
 
   // ── Daily reminder ───────────────────────────────────────
   // A static PWA can't guarantee a background push without a server. We use the
@@ -834,6 +834,88 @@
   on($("rem-toggle"), "change", onReminderToggle);
   on($("rem-time"), "change", onReminderTime);
 
+  // ── Offline audio download ───────────────────────────────
+  // On first load we download every pronunciation clip into a dedicated cache,
+  // with progress + retries, so audio works fully offline. Using the Cache API
+  // directly from the page makes this independent of service-worker timing.
+  var AUDIO_CACHE = "habla-audio-v1";
+  var OFFLINE_KEY = "habla.offline.v1";
+  var offline = { running: false, done: 0, failed: 0, total: WORDS.length };
+
+  function offlineComplete() { try { return localStorage.getItem(OFFLINE_KEY) === AUDIO_CACHE; } catch (e) { return false; } }
+  function cachesAvailable() { return "caches" in window; }
+
+  function updateOfflineUI() {
+    var sub = $("offline-sub"), bar = $("offline-bar"), badge = $("offline-badge"), btn = $("offline-download"), wrap = $("offline-bar-wrap");
+    if (!sub) return;
+    var total = WORDS.length;
+    if (!cachesAvailable()) {
+      sub.textContent = "This browser can't store audio offline; playback needs a connection.";
+      wrap.classList.add("hidden"); btn.classList.add("hidden"); badge.textContent = "";
+      return;
+    }
+    wrap.classList.remove("hidden"); btn.classList.remove("hidden");
+    if (offline.running) {
+      sub.textContent = "Downloading pronunciations… " + offline.done + " / " + total;
+      bar.style.width = (offline.done / total * 100) + "%";
+      badge.className = "offline-badge pending"; badge.textContent = "…";
+      btn.disabled = true; btn.textContent = "Downloading…";
+    } else if (offlineComplete()) {
+      sub.textContent = "All " + total + " pronunciation clips are saved on this device (~1.3 MB).";
+      bar.style.width = "100%";
+      badge.className = "offline-badge"; badge.textContent = "✓ Ready";
+      btn.disabled = false; btn.textContent = "Re-check";
+    } else if (!navigator.onLine) {
+      sub.textContent = "Connect to the internet once to save all audio for offline use.";
+      bar.style.width = (offline.done / total * 100) + "%";
+      badge.className = "offline-badge pending"; badge.textContent = "offline";
+      btn.disabled = true; btn.textContent = "Download for offline";
+    } else {
+      sub.textContent = "Download all audio so pronunciations work with no signal (~1.3 MB).";
+      bar.style.width = (offline.done / total * 100) + "%";
+      badge.className = "offline-badge pending"; badge.textContent = "";
+      btn.disabled = false; btn.textContent = "Download for offline";
+    }
+  }
+
+  function prefetchAudio(force) {
+    if (offline.running || !cachesAvailable()) { updateOfflineUI(); return; }
+    if (offlineComplete() && !force) { updateOfflineUI(); return; }
+    if (!navigator.onLine) { updateOfflineUI(); return; }
+    offline.running = true; offline.done = 0; offline.failed = 0;
+    var announced = !force && !offlineComplete();
+    if (announced) toast("Saving audio for offline…");
+    updateOfflineUI();
+
+    caches.open(AUDIO_CACHE).then(function (cache) {
+      var urls = WORDS.map(function (w) { return "audio/" + w.id + ".mp3"; });
+      var i = 0;
+      function worker() {
+        if (i >= urls.length) return Promise.resolve();
+        var u = urls[i++];
+        return cache.match(u).then(function (hit) {
+          return hit ? null : cache.add(u);
+        }).then(function () { offline.done++; }, function () { offline.failed++; })
+          .then(function () { updateOfflineUI(); return worker(); });
+      }
+      var workers = [];
+      for (var k = 0; k < 6; k++) workers.push(worker());
+      return Promise.all(workers);
+    }).then(function () {
+      offline.running = false;
+      if (offline.failed === 0) {
+        try { localStorage.setItem(OFFLINE_KEY, AUDIO_CACHE); } catch (e) {}
+        if (announced) toast("✓ All audio saved for offline");
+      } else if (announced) {
+        toast(offline.failed + " clip(s) didn't save — tap “Download” to retry");
+      }
+      updateOfflineUI();
+    }).catch(function () { offline.running = false; updateOfflineUI(); });
+  }
+
+  on($("offline-download"), "click", function () { prefetchAudio(true); });
+  window.addEventListener("online", function () { if (!offlineComplete()) prefetchAudio(false); updateOfflineUI(); });
+
   on($("btn-reset"), "click", function () {
     openConfirm({
       title: "Reset progress?",
@@ -906,6 +988,14 @@
         // a limited number ahead, and the in-app timer needs re-setting).
         if (reminder.enabled && Notification.permission === "granted") scheduleReminder();
       }).catch(function () { /* offline still fine after first load */ });
+    });
+    // Download all pronunciation audio for offline use (once, in the background).
+    window.addEventListener("load", function () {
+      if (!offlineComplete()) setTimeout(function () { prefetchAudio(false); }, 1200);
+    });
+  } else {
+    window.addEventListener("load", function () {
+      if (!offlineComplete()) setTimeout(function () { prefetchAudio(false); }, 1200);
     });
   }
 

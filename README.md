@@ -88,8 +88,14 @@ python tools/gen_audio.py        # writes audio/<id>.mp3, idempotent
 
 ## Offline & install
 
-- A **service worker** (`sw.js`) caches the whole app shell **and all audio** on
-  first load, so it runs with no signal afterward.
+- A **service worker** (`sw.js`) precaches the app shell on install and serves it
+  cache-first, so the app runs with no signal after the first load.
+- **All 187 audio clips are downloaded on first load** by the page itself (see
+  `prefetchAudio` in `app.js`) into a dedicated `habla-audio-v1` cache, with a
+  progress bar and retries under More → Offline (“✓ Ready” when complete). Doing
+  it from the page (Cache API) rather than the service-worker install makes the
+  download complete and visible instead of best-effort. The audio cache is
+  preserved across shell updates so clips aren't re-downloaded.
 - Progress is stored in `localStorage` on the device — nothing is uploaded.
 - **Install to your home screen:** on Android use the browser menu → *Install
   app*; on iPhone/iPad use Share → *Add to Home Screen*. It then launches
