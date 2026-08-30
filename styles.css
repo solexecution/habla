@@ -131,6 +131,47 @@ header.top { display: flex; align-items: center; gap: 12px; padding: 6px 2px 16p
 .title h1 { font-size: 1.3rem; margin: 0; letter-spacing: -.02em; font-weight: 800; }
 .title p { margin: 0; color: var(--muted); font-size: .8rem; }
 
+/* Streak / due banner */
+.banner {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: linear-gradient(135deg, var(--brand-tint), transparent);
+  border: 1px solid var(--brand); color: var(--text);
+  border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; font-weight: 600; font-size: .9rem;
+  animation: rise .32s var(--ease) both;
+}
+.banner .banner-btn {
+  margin-left: auto; appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 700;
+  background: var(--brand); color: var(--brand-ink); padding: 8px 14px; border-radius: 10px;
+}
+.banner .banner-btn:active { transform: scale(.96); }
+
+/* Settings rows */
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.row-between + .row-between { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.row-text b { font-size: .98rem; }
+.row-text p { margin: 3px 0 0; color: var(--muted); font-size: .82rem; }
+.rem-note { margin: 12px 0 0; color: var(--muted); font-size: .8rem; }
+#rem-time {
+  font: inherit; font-weight: 700; padding: 9px 12px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--bg-soft); color: var(--text); color-scheme: light dark;
+}
+
+/* Toggle switch */
+.switch { position: relative; flex: 0 0 auto; width: 52px; height: 30px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch .track {
+  position: absolute; inset: 0; border-radius: 999px; background: var(--line-hi);
+  transition: background .2s; pointer-events: none;
+}
+.switch .track::before {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+  border-radius: 999px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transition: transform .2s var(--ease);
+}
+.switch input:checked + .track { background: var(--brand); }
+.switch input:checked + .track::before { transform: translateX(22px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--brand); outline-offset: 2px; }
+.switch input:disabled + .track { opacity: .5; }
+
 /* Progress ring + stats */
 .stats {
   display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center;

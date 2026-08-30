@@ -299,6 +299,26 @@
     var circ = 2 * Math.PI * 36;
     $("ring-fg").style.strokeDasharray = circ;
     $("ring-fg").style.strokeDashoffset = circ * (1 - pct / 100);
+    renderBanner();
+  }
+
+  // A reliable, always-works nudge: streak-at-risk + due count. Loss aversion is
+  // a strong motivator, and this fires whenever the app is opened.
+  function renderBanner() {
+    var b = $("due-banner"); if (!b) return;
+    var due = dueCount(), practicedToday = state.streak.last === todayStr();
+    if (due > 0 && !practicedToday) {
+      b.innerHTML = "🔥 " + (state.streak.count > 0 ? "Keep your " + state.streak.count + "-day streak — " : "") +
+        due + " word" + (due > 1 ? "s" : "") + " due" +
+        "<button class=\"banner-btn\" id=\"banner-go\">Practice</button>";
+      b.classList.remove("hidden");
+      on($("banner-go"), "click", function () { show("recall"); });
+    } else if (practicedToday && state.streak.count > 0) {
+      b.innerHTML = "✓ Practiced today — " + state.streak.count + "-day streak going strong.";
+      b.classList.remove("hidden");
+    } else {
+      b.classList.add("hidden");
+    }
   }
   on($("btn-start-learn"), "click", function () { show("learn"); });
   on($("btn-start-quiz"), "click", function () { show("quiz"); });
@@ -681,7 +701,134 @@
   on($("browse-back"), "click", renderBrowse);
 
   // ── More / settings ──────────────────────────────────────
-  function renderMore() { /* nothing dynamic besides install button state */ }
+  function renderMore() { renderReminder(); }
+
+  // ── Daily reminder ───────────────────────────────────────
+  // A static PWA can't guarantee a background push without a server. We use the
+  // Notification Triggers API for a real scheduled local notification where it's
+  // supported (installed Android/Chrome), plus an in-app timer while the app is
+  // open, and the always-on streak banner. The UI is honest about which applies.
+  var REMIND_KEY = "habla.reminder";
+  var reminder = loadReminder();
+  var inAppTimer = null;
+
+  function loadReminder() {
+    try { return JSON.parse(localStorage.getItem(REMIND_KEY)) || { enabled: false, time: "19:00" }; }
+    catch (e) { return { enabled: false, time: "19:00" }; }
+  }
+  function saveReminder() { try { localStorage.setItem(REMIND_KEY, JSON.stringify(reminder)); } catch (e) {} }
+
+  function notifSupported() { return "Notification" in window && "serviceWorker" in navigator; }
+  function triggersSupported() {
+    return notifSupported() && "showTrigger" in Notification.prototype && typeof TimestampTrigger !== "undefined";
+  }
+  function fmt12(hhmm) {
+    var p = hhmm.split(":"), h = +p[0], m = p[1];
+    var ap = h < 12 ? "AM" : "PM", h12 = h % 12; if (h12 === 0) h12 = 12;
+    return h12 + ":" + m + " " + ap;
+  }
+
+  function renderReminder() {
+    var t = $("rem-toggle"), note = $("rem-note");
+    if (!t) return;
+    if (!notifSupported()) { t.disabled = true; t.checked = false; $("rem-time-row").classList.add("hidden"); note.textContent = "This browser doesn't support notifications."; return; }
+    t.checked = reminder.enabled;
+    $("rem-time").value = reminder.time;
+    $("rem-time-row").classList.toggle("hidden", !reminder.enabled);
+    if (reminder.enabled) {
+      if (Notification.permission === "granted") {
+        note.textContent = triggersSupported()
+          ? "On — you'll get a reminder at " + fmt12(reminder.time) + " each day, even when the app is closed."
+          : "On — a reminder shows at " + fmt12(reminder.time) + " while the app is open. Install Hablá (Android/Chrome) for reminders when it's closed; on iPhone, add it to your Home Screen first.";
+      } else {
+        note.textContent = "Notifications are blocked. Turn them on for this site in your browser settings, then toggle again.";
+      }
+    } else {
+      note.textContent = "Off. A daily nudge is the single biggest thing that keeps a habit going.";
+    }
+  }
+
+  function onReminderToggle() {
+    var t = $("rem-toggle");
+    if (t.checked) {
+      var apply = function (perm) {
+        if (perm !== "granted") { t.checked = false; reminder.enabled = false; saveReminder(); renderReminder(); toast("Allow notifications to get reminders"); return; }
+        reminder.enabled = true; saveReminder(); renderReminder(); scheduleReminder();
+        toast("Reminder set for " + fmt12(reminder.time));
+      };
+      if (Notification.permission === "granted") apply("granted");
+      else {
+        try {
+          var p = Notification.requestPermission(apply);          // older callback form
+          if (p && p.then) p.then(apply);                          // modern promise form
+        } catch (e) { apply(Notification.permission); }
+      }
+    } else {
+      reminder.enabled = false; saveReminder(); clearScheduled(); renderReminder(); toast("Reminder off");
+    }
+  }
+
+  function onReminderTime() {
+    reminder.time = $("rem-time").value || "19:00"; saveReminder();
+    if (reminder.enabled && Notification.permission === "granted") { scheduleReminder(); toast("Reminder updated to " + fmt12(reminder.time)); }
+  }
+
+  function nextOccurrence(hhmm, addDays) {
+    var p = hhmm.split(":"), d = new Date();
+    d.setHours(+p[0], +p[1], 0, 0);
+    if (addDays) d.setDate(d.getDate() + addDays);
+    else if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 1);
+    return d;
+  }
+
+  function clearScheduled() {
+    if (inAppTimer) { clearTimeout(inAppTimer); inAppTimer = null; }
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg || !reg.getNotifications) return;
+      var close = function (ns) { ns.forEach(function (n) { if (n.tag && n.tag.indexOf("habla-daily") === 0) n.close(); }); };
+      reg.getNotifications({ includeTriggered: true }).then(close).catch(function () {
+        reg.getNotifications().then(close).catch(function () {});
+      });
+    }).catch(function () {});
+  }
+
+  function scheduleReminder() {
+    if (!reminder.enabled || !notifSupported() || Notification.permission !== "granted") return;
+    clearScheduled();
+    var body = "Time for a quick Spanish session — keep your streak alive 🔥";
+    var opts = { body: body, icon: "icons/icon-192.png", badge: "icons/icon-192.png", data: { url: "./" } };
+    if (triggersSupported()) {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (!reg) return;
+        for (var i = 0; i < 7; i++) {
+          var when = nextOccurrence(reminder.time, i);
+          if (i === 0 && when.getTime() <= Date.now()) continue;
+          try {
+            reg.showNotification("¡Hablá!", Object.assign({}, opts, {
+              tag: "habla-daily-" + i, showTrigger: new TimestampTrigger(when.getTime())
+            }));
+          } catch (e) {}
+        }
+      });
+    }
+    // Always: if the tab is open at the scheduled time, fire it and re-arm.
+    var ms = nextOccurrence(reminder.time, 0).getTime() - Date.now();
+    if (ms > 0 && ms < 25 * 3600 * 1000) {
+      inAppTimer = setTimeout(function () {
+        if (Notification.permission === "granted") {
+          navigator.serviceWorker.getRegistration().then(function (reg) {
+            if (reg && reg.showNotification) reg.showNotification("¡Hablá!", Object.assign({}, opts, { tag: "habla-daily-now" }));
+            else { try { new Notification("¡Hablá!", opts); } catch (e) {} }
+          }).catch(function () {});
+        }
+        scheduleReminder();
+      }, ms + 500);
+    }
+  }
+
+  on($("rem-toggle"), "change", onReminderToggle);
+  on($("rem-time"), "change", onReminderTime);
 
   on($("btn-reset"), "click", function () {
     openConfirm({
@@ -750,7 +897,11 @@
   // ── Service worker ───────────────────────────────────────
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("sw.js").catch(function () { /* offline still fine after first load */ });
+      navigator.serviceWorker.register("sw.js").then(function () {
+        // Re-arm the daily reminder each time the app opens (triggers only persist
+        // a limited number ahead, and the in-app timer needs re-setting).
+        if (reminder.enabled && Notification.permission === "granted") scheduleReminder();
+      }).catch(function () { /* offline still fine after first load */ });
     });
   }
 

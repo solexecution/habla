@@ -1,6 +1,6 @@
 /* Hablá service worker — offline-first caching of the app shell + audio.
  * Bump CACHE when any listed asset changes so clients pull the new version. */
-var CACHE = "habla-v6";
+var CACHE = "habla-v7";
 var ASSETS = [
   "./",
   "./index.html",
@@ -40,6 +40,20 @@ self.addEventListener("activate", function (e) {
       return Promise.all(keys.filter(function (k) { return k !== CACHE; })
         .map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
+  );
+});
+
+// Focus (or open) the app when a reminder notification is tapped.
+self.addEventListener("notificationclick", function (e) {
+  e.notification.close();
+  var url = (e.notification.data && e.notification.data.url) || "./";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if ("focus" in list[i]) return list[i].focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
+    })
   );
 });
 

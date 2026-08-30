@@ -40,6 +40,7 @@
 
     <!-- ── HOME / progress ── -->
     <section id="view-home">
+      <div id="due-banner" class="banner hidden" role="status"></div>
       <div class="stats">
         <div class="ring">
           <svg width="84" height="84">
@@ -233,6 +234,22 @@
           <button data-theme-choice="dark">Dark</button>
         </div>
       </div>
+      <div class="section-title">Daily reminder</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="row-between">
+          <div class="row-text">
+            <b>Practice reminder</b>
+            <p>A daily nudge to keep your streak alive — showing up is what turns study into mastery.</p>
+          </div>
+          <label class="switch"><input type="checkbox" id="rem-toggle" /><span class="track"></span></label>
+        </div>
+        <div class="row-between hidden" id="rem-time-row">
+          <label class="row-text" for="rem-time"><b>Time</b></label>
+          <input type="time" id="rem-time" value="19:00" />
+        </div>
+        <p class="rem-note" id="rem-note"></p>
+      </div>
+
       <div class="section-title">Your data</div>
       <div class="card" style="margin-bottom:16px">
         <p style="margin:0 0 12px;color:var(--muted)">Progress is stored only on this device. Nothing is uploaded.</p>
