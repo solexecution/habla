@@ -257,6 +257,53 @@ nav.tabs button.active svg { transform: translateY(-1px) scale(1.06); }
 .option.wrong { background: var(--bad-tint); border-color: var(--bad); }
 .option:disabled { cursor: default; }
 
+/* ── Recall (productive practice) ── */
+.mode-switch { display: inline-flex; gap: 3px; background: var(--card-hi); border: 1px solid var(--line); border-radius: 11px; padding: 3px; }
+.mode-switch button { appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-weight: 700; font-size: .8rem; padding: 7px 11px; border-radius: 8px; cursor: pointer; transition: background .18s, color .18s; }
+.mode-switch button.active { background: var(--card); color: var(--brand-hi); box-shadow: var(--shadow); }
+
+.recall-card { position: relative; text-align: center; min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.prompt-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
+.recall-card .rc-en { font-size: 1.9rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+.recall-card .rc-sub { color: var(--muted); font-size: .85rem; margin-top: -4px; }
+#rc-input {
+  width: 100%; font: inherit; font-size: 1.25rem; font-weight: 700; text-align: center;
+  padding: 13px 14px; border-radius: 13px; border: 2px solid var(--line);
+  background: var(--bg-soft); color: var(--text); outline: none; transition: border-color .15s;
+}
+#rc-input:focus { border-color: var(--brand); }
+#rc-input.ok { border-color: var(--good); background: var(--good-tint); }
+#rc-input.bad { border-color: var(--bad); background: var(--bad-tint); }
+.accents { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.accents button {
+  appearance: none; border: 1px solid var(--line); background: var(--card-hi); color: var(--text);
+  font: inherit; font-weight: 700; font-size: 1rem; min-width: 38px; padding: 7px 0; border-radius: 9px; cursor: pointer;
+  transition: transform .07s var(--ease), border-color .15s;
+}
+.accents button:hover { border-color: var(--line-hi); }
+.accents button:active { transform: scale(.9); }
+.rc-feedback { min-height: 22px; font-weight: 700; font-size: .92rem; }
+.rc-feedback.ok { color: var(--good); }
+.rc-feedback.close { color: var(--hard); }
+.rc-feedback.bad { color: var(--bad); }
+.rc-feedback .ans { color: var(--text); }
+.rc-feedback .ex { display: block; margin-top: 4px; font-weight: 400; color: var(--muted); font-size: .84rem; font-style: italic; }
+
+/* Hands-free / car */
+.recall-card.hands { min-height: 260px; }
+.recall-card.hands .rc-en { font-size: 2.1rem; }
+.rh-answer .es { font-size: 2rem; font-weight: 800; }
+.rh-answer .pron { color: var(--brand-hi); font-style: italic; }
+.rh-hint { position: absolute; bottom: 14px; color: var(--muted); font-size: .74rem; }
+.speak.big { width: 68px; height: 68px; }
+.speak.big svg { width: 30px; height: 30px; }
+.btn.big { padding: 17px 18px; font-size: 1.05rem; }
+.rate-row.big { display: none; gap: 12px; margin-top: 10px; }
+.rate-row.big.show { display: flex; }
+.rate-row.big .btn { padding: 18px 8px; font-size: 1.05rem; }
+.autoplay { display: flex; align-items: center; gap: 9px; justify-content: center; margin-top: 16px; color: var(--muted); font-size: .82rem; }
+.autoplay input { width: 18px; height: 18px; accent-color: var(--brand); }
+
 /* ── Browse / categories ── */
 .cat {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;

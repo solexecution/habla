@@ -263,7 +263,7 @@
   // ── Tabs / routing ───────────────────────────────────────
   var views = {
     home: $("view-home"), learn: $("view-learn"), quiz: $("view-quiz"),
-    browse: $("view-browse"), more: $("view-more")
+    recall: $("view-recall"), browse: $("view-browse"), more: $("view-more")
   };
   var tabBtns = document.querySelectorAll("nav.tabs button");
 
@@ -279,6 +279,7 @@
     if (tab === "home") renderHome();
     if (tab === "learn") startLearn();
     if (tab === "quiz") startQuiz();
+    if (tab === "recall") startRecall();
     if (tab === "browse") renderBrowse();
     if (tab === "more") renderMore();
     window.scrollTo(0, 0);
@@ -353,7 +354,7 @@
   on($("fc-speak-front"), "click", function (e) { e.stopPropagation(); playWord(deck[idx]); });
   on($("fc-speak-back"), "click", function (e) { e.stopPropagation(); playWord(deck[idx]); });
 
-  document.querySelectorAll(".rate-row .btn").forEach(function (b) {
+  document.querySelectorAll("#rate-row .btn").forEach(function (b) {
     on(b, "click", function () {
       schedule(deck[idx], b.dataset.grade);
       idx++;
@@ -440,6 +441,203 @@
     bumpStreak(); save(); renderHome();
   }
   on($("btn-quiz-again"), "click", startQuiz);
+
+  // ── Recall (productive practice: type it, or hands-free for the car) ──
+  var rDeck = [], rIdx = 0, rMode = "type", rRevealed = false, rAnswered = false;
+  var rAuto = false, rAutoTimer = null;
+
+  // Accent-insensitive, punctuation-insensitive comparison key.
+  function normalize(s) {
+    return (s || "").toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")   // strip accents
+      .replace(/…/g, "")
+      .replace(/[¿?¡!.,;:"'()]/g, "")
+      .replace(/\s+/g, " ").trim();
+  }
+  // Keeps accents; ignores case, surrounding ¿¡?!, ellipsis — for an exact check.
+  function stripEdges(s) {
+    return (s || "").toLowerCase().replace(/…/g, "")
+      .replace(/^[¿¡\s]+/, "").replace(/[?!.\s]+$/, "")
+      .replace(/\s+/g, " ").trim();
+  }
+  function targetAnswer(w) { return w.es.replace(/…/g, "").replace(/\s+/g, " ").trim(); }
+
+  function levenshtein(a, b) {
+    var m = a.length, n = b.length, i, j, d = [];
+    if (!m) return n; if (!n) return m;
+    for (i = 0; i <= m; i++) d[i] = [i];
+    for (j = 0; j <= n; j++) d[0][j] = j;
+    for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) {
+      var c = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+    }
+    return d[m][n];
+  }
+
+  function startRecall() {
+    rDeck = buildSession(); rIdx = 0;
+    $("recall-done").classList.add("hidden");
+    setRecallMode(rMode);
+  }
+
+  function setRecallMode(mode) {
+    rMode = mode;
+    document.querySelectorAll("#recall-mode button").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.mode === mode);
+    });
+    clearTimeout(rAutoTimer);
+    if (rIdx < rDeck.length) {
+      $("recall-type").classList.toggle("hidden", mode !== "type");
+      $("recall-hands").classList.toggle("hidden", mode !== "hands");
+      renderRecall();
+    }
+  }
+
+  function renderRecall() {
+    clearTimeout(rAutoTimer);
+    if (rIdx >= rDeck.length) return finishRecall();
+    var w = rDeck[rIdx];
+    rRevealed = false; rAnswered = false;
+    $("recall-count").textContent = "Card " + (rIdx + 1) + " of " + rDeck.length;
+    $("recall-progress").style.width = (rIdx / rDeck.length * 100) + "%";
+    if (rMode === "type") renderRecallType(w); else renderRecallHands(w);
+  }
+
+  // ── Type mode ──
+  function renderRecallType(w) {
+    $("rc-cat").textContent = CATEGORIES[w.cat];
+    $("rc-en").textContent = w.en.replace(/…/g, "");
+    $("rc-sub").textContent = "";
+    var inp = $("rc-input");
+    inp.value = ""; inp.className = ""; inp.disabled = false;
+    var fb = $("rc-feedback"); fb.textContent = ""; fb.className = "rc-feedback";
+    $("rc-check").textContent = "Check";
+    setTimeout(function () { try { inp.focus(); } catch (e) {} }, 40);
+  }
+
+  function checkRecall() {
+    if (rAnswered) return;
+    var w = rDeck[rIdx], inp = $("rc-input"), fb = $("rc-feedback");
+    if (!normalize(inp.value)) return;
+    var grade;
+    if (stripEdges(inp.value) === stripEdges(w.es)) {
+      grade = "good"; inp.classList.add("ok"); fb.className = "rc-feedback ok";
+      fb.textContent = "¡Correcto! ✓";
+    } else if (normalize(inp.value) === normalize(w.es)) {
+      grade = "good"; inp.classList.add("ok"); fb.className = "rc-feedback close";
+      fb.innerHTML = "Casi perfecto — cuida los acentos: <span class=\"ans\">" + esc(w.es) + "</span>";
+    } else if (levenshtein(normalize(inp.value), normalize(w.es)) <= (normalize(w.es).length <= 5 ? 1 : 2)) {
+      grade = "hard"; inp.classList.add("bad"); fb.className = "rc-feedback close";
+      fb.innerHTML = "Muy cerca. Respuesta: <span class=\"ans\">" + esc(w.es) + "</span>";
+    } else {
+      grade = "again"; inp.classList.add("bad"); fb.className = "rc-feedback bad";
+      fb.innerHTML = "La respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" +
+        "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>";
+    }
+    rAnswered = true; inp.disabled = true;
+    playWord(w); schedule(w, grade);
+    $("rc-check").textContent = "Next →";
+  }
+
+  function skipRecall() {
+    if (rAnswered) { nextRecall(); return; }
+    var w = rDeck[rIdx], inp = $("rc-input"), fb = $("rc-feedback");
+    inp.classList.add("bad"); fb.className = "rc-feedback bad";
+    fb.innerHTML = "La respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" +
+      "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>";
+    rAnswered = true; inp.disabled = true;
+    playWord(w); schedule(w, "again");
+    $("rc-check").textContent = "Next →";
+  }
+
+  function nextRecall() { rIdx++; renderRecall(); }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // ── Hands-free / car mode ──
+  function renderRecallHands(w) {
+    $("rh-cat").textContent = CATEGORIES[w.cat];
+    $("rh-en").textContent = w.en.replace(/…/g, "");
+    $("rh-es").textContent = w.es;
+    $("rh-pron").textContent = w.pron;
+    $("rh-answer").classList.add("hidden");
+    $("rh-reveal-row").classList.remove("hidden");
+    $("rh-rate").classList.remove("show");
+    $("rh-hint").textContent = rAuto ? "Auto mode — listening…" : "Say it out loud, then reveal";
+    if (rAuto) rAutoTimer = setTimeout(revealHands, 3500);
+  }
+
+  function revealHands() {
+    if (rRevealed) return;
+    rRevealed = true;
+    var w = rDeck[rIdx];
+    $("rh-answer").classList.remove("hidden");
+    $("rh-reveal-row").classList.add("hidden");
+    playWord(w);
+    if (rAuto) {
+      // Passive exposure loop — no SRS grade written (honest: listening ≠ tested recall).
+      $("rh-hint").textContent = "Auto mode — next in a moment…";
+      rAutoTimer = setTimeout(function () { rIdx++; renderRecall(); }, 3600);
+    } else {
+      $("rh-rate").classList.add("show");
+      $("rh-hint").textContent = "How did you do?";
+    }
+  }
+
+  function gradeHands(grade) {
+    if (!rRevealed) return;
+    clearTimeout(rAutoTimer);
+    schedule(rDeck[rIdx], grade);
+    rIdx++; renderRecall();
+  }
+
+  function finishRecall() {
+    clearTimeout(rAutoTimer);
+    $("recall-progress").style.width = "100%";
+    $("recall-type").classList.add("hidden");
+    $("recall-hands").classList.add("hidden");
+    $("recall-done").classList.remove("hidden");
+    renderHome();
+  }
+
+  // Wire recall controls (once).
+  document.querySelectorAll("#recall-mode button").forEach(function (b) {
+    on(b, "click", function () { setRecallMode(b.dataset.mode); });
+  });
+  on($("rc-check"), "click", function () { if (rAnswered) nextRecall(); else checkRecall(); });
+  on($("rc-skip"), "click", skipRecall);
+  on($("rc-hintbtn"), "click", function () {
+    var t = targetAnswer(rDeck[rIdx]);
+    $("rc-sub").textContent = "Starts with “" + t.charAt(0) + "” · " +
+      t.replace(/[^ ]/g, "_") + " · " + rDeck[rIdx].pron;
+  });
+  (function initAccents() {
+    var chars = ["á", "é", "í", "ó", "ú", "ñ", "¿", "¡"], box = $("rc-accents");
+    chars.forEach(function (ch) {
+      var b = document.createElement("button");
+      b.type = "button"; b.textContent = ch;
+      on(b, "click", function () {
+        var inp = $("rc-input"); if (inp.disabled) return;
+        var s = inp.selectionStart || 0, e = inp.selectionEnd || 0;
+        inp.value = inp.value.slice(0, s) + ch + inp.value.slice(e);
+        inp.selectionStart = inp.selectionEnd = s + ch.length;
+        inp.focus();
+      });
+      box.appendChild(b);
+    });
+  })();
+  on($("rh-play"), "click", function () { playWord(rDeck[rIdx]); });
+  on($("rh-reveal"), "click", revealHands);
+  document.querySelectorAll("#rh-rate .btn").forEach(function (b) {
+    on(b, "click", function () { gradeHands(b.dataset.grade); });
+  });
+  on($("rh-auto"), "change", function () {
+    rAuto = this.checked;
+    if (rIdx < rDeck.length) renderRecall();
+  });
+  on($("btn-recall-again"), "click", startRecall);
 
   // ── Browse ───────────────────────────────────────────────
   function renderBrowse() {
@@ -564,6 +762,11 @@
       else if (e.key === "Enter") { e.preventDefault(); $("modal-confirm").click(); }
       return;
     }
+    // The recall answer box: Enter checks / advances; never treat typing as shortcuts.
+    if (e.target && e.target.id === "rc-input") {
+      if (e.key === "Enter") { e.preventDefault(); if (rAnswered) nextRecall(); else checkRecall(); }
+      return;
+    }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var tag = (e.target && e.target.tagName) || "";
     if (tag === "INPUT" || tag === "TEXTAREA") return;
@@ -584,6 +787,14 @@
       if (n >= 1 && n <= 4) {
         var opts = $("quiz-options").querySelectorAll(".option");
         if (opts[n - 1] && !opts[n - 1].disabled) { e.preventDefault(); opts[n - 1].click(); }
+      }
+    } else if (currentTab === "recall" && rMode === "hands" && rIdx < rDeck.length) {
+      if (e.key === " " || e.key === "Enter") {
+        if (tag === "BUTTON") return;   // let a focused button activate itself
+        e.preventDefault();
+        if (!rRevealed) revealHands();
+      } else if (rRevealed && (e.key === "1" || e.key === "3")) {
+        e.preventDefault(); gradeHands(e.key === "1" ? "again" : "good");
       }
     }
   });

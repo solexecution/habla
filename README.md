@@ -43,9 +43,18 @@ Every entry has `{ id, es, en, pron, cat, ex, exEn, pri }` — Spanish, English,
 pronunciation, theme, an example sentence with its translation, and a frequency
 tier.
 
+**Recall** is the productive-practice mode — the highest-leverage step, since
+*generating* an answer builds far stronger memory than recognising one:
+- **Type mode:** you type the Spanish from memory. Matching is forgiving (accents
+  and punctuation optional, one-character typos accepted with a nudge), with
+  on-screen accent buttons (á é í ó ú ñ ¿ ¡), a progressive hint, and native audio
+  on every answer. Results feed the same spaced-repetition scheduler.
+- **Hands-free mode:** a glanceable, audio-first, big-button flow for the car —
+  reveal-and-hear then a two-button self-rating, plus an optional **Auto** passive
+  listen-and-repeat loop that needs no tapping at all.
+
 There's also a **Quiz** mode (multiple choice, both directions) for a quick check,
-a **Words** browser to read any theme, and tap-to-hear pronunciation via the
-device's Spanish text-to-speech voice.
+a **Words** browser to read any theme, and tap-to-hear pronunciation on every word.
 
 ## Interface
 

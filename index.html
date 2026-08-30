@@ -72,6 +72,13 @@
         <p style="margin:0"><b>3. Everything saves on your phone.</b> Progress lives in this app and works with no signal. Add it to your home screen from your browser's share menu.</p>
       </div>
 
+      <div class="section-title">Why this works</div>
+      <div class="card">
+        <p style="margin:0 0 8px"><b>Spacing + retrieval.</b> You review each word just before you'd forget it, and you <i>recall</i> it rather than reread it — the two most robust findings in memory research.</p>
+        <p style="margin:0 0 8px"><b>Produce, don't just recognise.</b> In <i>Recall</i> you type the Spanish from memory (or go hands-free in the car). Generating an answer builds far stronger memory than picking from options.</p>
+        <p style="margin:0"><b>Words in context.</b> Every card carries an example sentence and native audio, so you learn the word the way you'll actually use it.</p>
+      </div>
+
       <footer class="credit">Hablá · offline PWA · 187 conversation starters</footer>
     </section>
 
@@ -141,6 +148,68 @@
       </div>
     </section>
 
+    <!-- ── RECALL (productive practice) ── -->
+    <section id="view-recall" class="hidden">
+      <div class="progressbar"><i id="recall-progress"></i></div>
+      <div class="deck-meta">
+        <span id="recall-count">—</span>
+        <div class="mode-switch" id="recall-mode" role="group" aria-label="Practice mode">
+          <button data-mode="type" class="active" type="button">⌨ Type</button>
+          <button data-mode="hands" type="button">🚗 Hands-free</button>
+        </div>
+      </div>
+
+      <!-- TYPE mode: produce the word from memory -->
+      <div id="recall-type">
+        <div class="card recall-card">
+          <span class="cat-chip" id="rc-cat"></span>
+          <div class="prompt-label">Type it in Spanish</div>
+          <div class="rc-en" id="rc-en"></div>
+          <div class="rc-sub" id="rc-sub"></div>
+          <input id="rc-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off"
+                 autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="tu respuesta…"
+                 aria-label="Type the Spanish word" />
+          <div class="accents" id="rc-accents" aria-label="Insert Spanish characters"></div>
+          <div class="rc-feedback" id="rc-feedback" aria-live="polite"></div>
+          <div class="btn-row">
+            <button class="btn ghost" id="rc-hintbtn" type="button">Hint</button>
+            <button class="btn secondary" id="rc-skip" type="button">Skip</button>
+            <button class="btn" id="rc-check" type="button">Check</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HANDS-FREE mode: glanceable, audio-first, big targets for the car -->
+      <div id="recall-hands" class="hidden">
+        <div class="card recall-card hands" id="rh-card">
+          <span class="cat-chip" id="rh-cat"></span>
+          <div class="rc-en" id="rh-en"></div>
+          <div class="rh-answer hidden" id="rh-answer">
+            <div class="es" id="rh-es"></div>
+            <div class="pron" id="rh-pron"></div>
+          </div>
+          <button class="speak big" id="rh-play" type="button" aria-label="Play pronunciation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          </button>
+          <div class="rh-hint" id="rh-hint">Say it out loud, then reveal</div>
+        </div>
+        <div class="btn-row" id="rh-reveal-row">
+          <button class="btn big" id="rh-reveal" type="button">Reveal &amp; hear</button>
+        </div>
+        <div class="rate-row big" id="rh-rate">
+          <button class="btn again" data-grade="again" type="button">Again</button>
+          <button class="btn good" data-grade="good" type="button">Got it</button>
+        </div>
+        <label class="autoplay"><input type="checkbox" id="rh-auto" /> Auto mode — passive listen &amp; repeat loop (no tapping)</label>
+      </div>
+
+      <div id="recall-done" class="empty hidden">
+        <h2>¡Muy bien! 🎉</h2>
+        <p id="recall-summary">You finished this recall session.</p>
+        <button class="btn" id="btn-recall-again" style="margin-top:8px" type="button">Another session</button>
+      </div>
+    </section>
+
     <!-- ── BROWSE ── -->
     <section id="view-browse" class="hidden">
       <div id="browse-cats">
@@ -193,6 +262,10 @@
     <button data-tab="quiz">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
       Quiz
+    </button>
+    <button data-tab="recall">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+      Recall
     </button>
     <button data-tab="browse">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
