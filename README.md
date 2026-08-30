@@ -86,6 +86,17 @@ node -e "const{WORDS}=require('./words.js');require('fs').writeFileSync('tools/_
 python tools/gen_audio.py        # writes audio/<id>.mp3, idempotent
 ```
 
+## Your own cards
+
+Under **Words → ＋ Add your own card** you can add a phrase by **typing or
+dictating** it (🎤 uses the Web Speech API — Android Chrome, needs mic permission
+and a connection; Spanish fields listen in `es-MX`, the meaning in `en-US`). A new
+card (Spanish + English, optional example) is stored in `localStorage`
+(`habla.custom`), filed under a **“My cards”** theme, and flows into every deck
+(Learn, Quiz, Recall, Words) with spaced repetition. Custom cards play through the
+device's Spanish TTS voice (no pre-recorded clip). Delete one from its row in the
+word browser.
+
 ## Word packs (expandable vocabulary)
 
 The core set is 187 words; you can grow it with **downloadable packs** under

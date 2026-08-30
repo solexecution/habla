@@ -216,7 +216,38 @@
     <!-- ── BROWSE ── -->
     <section id="view-browse" class="hidden">
       <div id="browse-cats">
-        <div class="section-title">All 187 words, by theme</div>
+        <div class="btn-row" style="margin-bottom:14px">
+          <button class="btn" id="btn-add-card" type="button">＋ Add your own card</button>
+        </div>
+
+        <div id="add-card" class="card hidden" style="margin-bottom:16px">
+          <div class="section-title" style="margin:0 0 12px">New card — type or dictate 🎤</div>
+          <label class="field"><span>Spanish <em>(required)</em></span>
+            <div class="field-row">
+              <input id="ac-es" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. ¿me lo repites?" />
+              <button class="mic" type="button" data-lang="es" data-target="ac-es" aria-label="Dictate in Spanish">🎤</button>
+            </div>
+          </label>
+          <label class="field"><span>English meaning <em>(required)</em></span>
+            <div class="field-row">
+              <input id="ac-en" type="text" autocomplete="off" placeholder="e.g. can you repeat that?" />
+              <button class="mic" type="button" data-lang="en" data-target="ac-en" aria-label="Dictate in English">🎤</button>
+            </div>
+          </label>
+          <label class="field"><span>Example sentence <em>(optional)</em></span>
+            <div class="field-row">
+              <input id="ac-ex" type="text" autocomplete="off" placeholder="a full sentence in Spanish" />
+              <button class="mic" type="button" data-lang="es" data-target="ac-ex" aria-label="Dictate an example in Spanish">🎤</button>
+            </div>
+          </label>
+          <p class="rem-note" id="ac-msg"></p>
+          <div class="btn-row">
+            <button class="btn secondary" id="ac-cancel" type="button">Cancel</button>
+            <button class="btn" id="ac-save" type="button">Save card</button>
+          </div>
+        </div>
+
+        <div class="section-title" id="browse-heading">Browse by theme</div>
         <div id="cat-list"></div>
       </div>
       <div id="browse-words" class="hidden">

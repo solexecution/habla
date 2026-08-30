@@ -342,14 +342,15 @@
     $("rate-row").classList.remove("show");
     $("flip-row").classList.remove("hidden");
 
-    $("fc-cat").textContent = CATEGORIES[w.cat];
-    $("fc-cat2").textContent = CATEGORIES[w.cat];
+    $("fc-cat").textContent = CATEGORIES[w.cat] || "";
+    $("fc-cat2").textContent = CATEGORIES[w.cat] || "";
     $("fc-es").textContent = w.es;
-    $("fc-pron").textContent = w.pron;
+    $("fc-pron").textContent = w.pron || "";
     $("fc-en").textContent = w.en;
-    $("fc-pron2").textContent = w.es + " · " + w.pron;
-    $("fc-ex-es").textContent = w.ex;
-    $("fc-ex-en").textContent = w.exEn;
+    $("fc-pron2").textContent = w.pron ? (w.es + " · " + w.pron) : w.es;
+    $("fc-ex").classList.toggle("hidden", !w.ex);
+    $("fc-ex-es").textContent = w.ex || "";
+    $("fc-ex-en").textContent = w.exEn || "";
     $("fc-hook").textContent = w.hook || "";
 
     $("learn-count").textContent = "Card " + (idx + 1) + " of " + deck.length;
@@ -553,7 +554,7 @@
     } else {
       grade = "again"; inp.classList.add("bad"); fb.className = "rc-feedback bad";
       fb.innerHTML = "La respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" +
-        "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>" + hookHtml;
+        (w.ex ? "<span class=\"ex\">" + esc(w.ex) + (w.exEn ? " — " + esc(w.exEn) : "") + "</span>" : "") + hookHtml;
     }
     rAnswered = true; inp.disabled = true;
     playWord(w); schedule(w, grade);
@@ -565,7 +566,7 @@
     var w = rDeck[rIdx], inp = $("rc-input"), fb = $("rc-feedback");
     inp.classList.add("bad"); fb.className = "rc-feedback bad";
     fb.innerHTML = "La respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" +
-      "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>" +
+      (w.ex ? "<span class=\"ex\">" + esc(w.ex) + (w.exEn ? " — " + esc(w.exEn) : "") + "</span>" : "") +
       (w.hook ? "<span class=\"ex\">💡 " + esc(w.hook) + "</span>" : "");
     rAnswered = true; inp.disabled = true;
     playWord(w); schedule(w, "again");
@@ -691,13 +692,26 @@
     WORDS.filter(function (w) { return w.cat === key; }).forEach(function (w) {
       var el = document.createElement("div");
       el.className = "word";
-      el.innerHTML =
-        '<span class="es">' + w.es + "</span>" +
+      var pron = w.pron ? '<span class="pron">' + esc(w.pron) + "</span>" : "";
+      var wex = w.ex ? '<span class="wex"><b>' + esc(w.ex) + "</b>" + (w.exEn ? " — " + esc(w.exEn) : "") + "</span>" : "";
+      var whook = w.hook ? '<span class="whook">💡 ' + esc(w.hook) + "</span>" : "";
+      var mine = w.custom ? '<span class="mine-chip">My card</span>' : "";
+      el.innerHTML = mine +
+        '<span class="es">' + esc(w.es) + "</span>" +
         '<span class="known">' + (isKnown(w) ? "✓" : "") + "</span>" +
-        '<span class="en">' + w.en + "</span>" +
-        '<span class="pron">' + w.pron + "</span>" +
-        '<span class="wex"><b>' + w.ex + "</b> — " + w.exEn + "</span>" +
-        (w.hook ? '<span class="whook">💡 ' + w.hook + "</span>" : "");
+        '<span class="en">' + esc(w.en) + "</span>" + pron + wex + whook;
+      if (w.custom) {
+        var del = document.createElement("button");
+        del.className = "card-del"; del.type = "button"; del.textContent = "🗑"; del.setAttribute("aria-label", "Delete card");
+        on(del, "click", function (e) {
+          e.stopPropagation();
+          openConfirm({ title: "Delete this card?", body: "“" + w.es + "” will be removed from your decks.", confirmLabel: "Delete" }, function () {
+            deleteCustomCard(w.id);
+            if (WORDS.some(function (x) { return x.cat === CUSTOM_CAT; })) renderCategory(CUSTOM_CAT); else renderBrowse();
+          });
+        });
+        el.appendChild(del);
+      }
       on(el, "click", function () { playWord(w); });
       box.appendChild(el);
     });
@@ -1164,7 +1178,89 @@
     }
   });
 
+  // ── Custom cards (add your own by typing or dictation) ───
+  var CUSTOM_KEY = "habla.custom";
+  var CUSTOM_CAT = "mios";
+  function getCustom() { try { return JSON.parse(localStorage.getItem(CUSTOM_KEY)) || []; } catch (e) { return []; } }
+  function saveCustomArr(a) { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(a)); } catch (e) { toast("Couldn't save — storage may be full"); } }
+  function slugify(s) {
+    return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || "card";
+  }
+  function ensureCustomCat() { if (!CATEGORIES[CUSTOM_CAT]) CATEGORIES[CUSTOM_CAT] = "My cards"; }
+
+  function mergeCustom() {
+    var arr = getCustom();
+    if (arr.length) ensureCustomCat();
+    var have = {}; WORDS.forEach(function (w) { have[w.id] = true; });
+    arr.forEach(function (w) { if (!have[w.id]) WORDS.push(w); });
+    setWordCount();
+  }
+
+  function addCustomCard(es, en, ex) {
+    es = (es || "").trim(); en = (en || "").trim(); ex = (ex || "").trim();
+    if (!es || !en) return false;
+    var arr = getCustom();
+    var card = { id: "mio-" + slugify(es) + "-" + Date.now().toString(36), es: es, en: en, pron: "", cat: CUSTOM_CAT, pri: 1, custom: true, hook: "" };
+    if (ex) { card.ex = ex; card.exEn = ""; }
+    arr.push(card); saveCustomArr(arr);
+    ensureCustomCat(); WORDS.push(card); setWordCount();
+    return true;
+  }
+
+  function deleteCustomCard(id) {
+    saveCustomArr(getCustom().filter(function (w) { return w.id !== id; }));
+    for (var i = WORDS.length - 1; i >= 0; i--) if (WORDS[i].id === id) WORDS.splice(i, 1);
+    if (!WORDS.some(function (w) { return w.cat === CUSTOM_CAT; })) delete CATEGORIES[CUSTOM_CAT];
+    setWordCount(); toast("Card deleted");
+  }
+
+  // Dictation via the Web Speech API (Android Chrome; needs mic + connection).
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var activeRec = null;
+  function dictate(targetId, langKind, btn) {
+    if (!SpeechRec) { toast("Voice input isn't supported on this browser"); return; }
+    if (activeRec) { try { activeRec.stop(); } catch (e) {} }
+    var rec = new SpeechRec();
+    rec.lang = langKind === "en" ? "en-US" : "es-MX";
+    rec.interimResults = false; rec.maxAlternatives = 1;
+    activeRec = rec; btn.classList.add("listening");
+    rec.onresult = function (e) {
+      var t = (e.results[0][0].transcript || "").trim();
+      var inp = $(targetId); inp.value = inp.value ? (inp.value.trim() + " " + t) : t;
+    };
+    rec.onerror = function (e) {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") toast("Allow microphone access to dictate");
+      else if (e.error === "no-speech") toast("Didn't catch that — try again");
+      else if (e.error === "network") toast("Dictation needs an internet connection");
+    };
+    rec.onend = function () { btn.classList.remove("listening"); if (activeRec === rec) activeRec = null; };
+    try { rec.start(); } catch (e) { btn.classList.remove("listening"); }
+  }
+
+  function openAddCard() { $("add-card").classList.remove("hidden"); $("ac-msg").textContent = ""; setTimeout(function () { try { $("ac-es").focus(); } catch (e) {} }, 40); }
+  function closeAddCard() {
+    $("add-card").classList.add("hidden");
+    if (activeRec) { try { activeRec.stop(); } catch (e) {} }
+    $("ac-es").value = ""; $("ac-en").value = ""; $("ac-ex").value = ""; $("ac-msg").textContent = "";
+  }
+  on($("btn-add-card"), "click", function () {
+    if ($("add-card").classList.contains("hidden")) openAddCard(); else closeAddCard();
+  });
+  on($("ac-cancel"), "click", closeAddCard);
+  on($("ac-save"), "click", function () {
+    if (!$("ac-es").value.trim() || !$("ac-en").value.trim()) { $("ac-msg").textContent = "Add both the Spanish and its English meaning."; return; }
+    if (addCustomCard($("ac-es").value, $("ac-en").value, $("ac-ex").value)) {
+      toast("✓ Card added to “My cards”"); closeAddCard(); renderBrowse();
+    }
+  });
+  document.querySelectorAll("#add-card .mic").forEach(function (b) {
+    if (!SpeechRec) { b.classList.add("off"); b.title = "Voice input isn't supported on this browser"; }
+    on(b, "click", function () { dictate(b.dataset.target, b.dataset.lang, b); });
+  });
+
   // ── Boot ─────────────────────────────────────────────────
   mergeInstalledPacks();   // fold any previously-downloaded packs into the decks
+  mergeCustom();           // and any cards the user added
   renderHome();
 })();
