@@ -1,0 +1,6 @@
+{
+  "packs": [
+    { "id": "everyday-extras", "name": "Everyday Extras", "description": "Food & drink, colours, weather, the body, home objects and a few more verbs.", "file": "packs/everyday-extras.json", "count": 45, "sizeKb": 330 },
+    { "id": "getting-around", "name": "Getting Around", "description": "Directions, transport, places to go, and shopping words for travelling.", "file": "packs/getting-around.json", "count": 28, "sizeKb": 210 }
+  ]
+}

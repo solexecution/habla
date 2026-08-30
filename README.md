@@ -86,6 +86,23 @@ node -e "const{WORDS}=require('./words.js');require('fs').writeFileSync('tools/_
 python tools/gen_audio.py        # writes audio/<id>.mp3, idempotent
 ```
 
+## Word packs (expandable vocabulary)
+
+The core set is 187 words; you can grow it with **downloadable packs** under
+More → Word packs (needs a connection — the UI flags Wi‑Fi vs mobile data):
+
+- Packs live in `packs/*.json` (each: `{ id, name, description, categories, words }`,
+  same word shape as core) and are listed in `packs/index.json`.
+- Downloading a pack fetches its JSON, **stores it locally** (so it works offline
+  afterwards), **merges** its words/categories into every deck (Learn, Quiz,
+  Recall, Words), updates the header count, and pulls its audio into the offline
+  cache. Removing a pack detaches its words again; progress on other words is
+  untouched.
+- Bundled packs: **Everyday Extras** (45 — food, colours, weather, the body,
+  home objects, more verbs) and **Getting Around** (28 — directions, transport,
+  places, shopping). Add a new pack by dropping a JSON file in `packs/`, listing
+  it in `index.json`, and generating its audio with `tools/gen_audio.py`.
+
 ## Offline & install
 
 - A **service worker** (`sw.js`) precaches the app shell on install and serves it

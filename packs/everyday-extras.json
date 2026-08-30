@@ -1,0 +1,65 @@
+{
+  "id": "everyday-extras",
+  "name": "Everyday Extras",
+  "description": "Food & drink, colours, weather, the body, home objects and a few more verbs.",
+  "categories": {
+    "alimentos": "Food & drink",
+    "colores": "Colours",
+    "clima": "Weather",
+    "cuerpo": "The body",
+    "objetos": "Home & objects",
+    "acciones": "More verbs"
+  },
+  "words": [
+    { "id": "pan", "es": "pan", "en": "bread", "pron": "pahn", "cat": "alimentos", "pri": 1, "ex": "Compré pan fresco.", "exEn": "I bought fresh bread.", "hook": "cf. “companion” — one you share bread with (Latin panis)." },
+    { "id": "leche", "es": "leche", "en": "milk", "pron": "LEH-cheh", "cat": "alimentos", "pri": 1, "ex": "Un café con leche, por favor.", "exEn": "A coffee with milk, please.", "hook": "≈ “lactose / lactate” (Latin lac)." },
+    { "id": "huevo", "es": "huevo", "en": "egg", "pron": "WEH-voh", "cat": "alimentos", "pri": 2, "ex": "Quiero dos huevos.", "exEn": "I want two eggs.", "hook": "≈ “ovum / oval” (Latin ovum)." },
+    { "id": "fruta", "es": "fruta", "en": "fruit", "pron": "FROO-tah", "cat": "alimentos", "pri": 2, "ex": "Me gusta la fruta fresca.", "exEn": "I like fresh fruit.", "hook": "≈ “fruit”." },
+    { "id": "carne", "es": "carne", "en": "meat", "pron": "KAR-neh", "cat": "alimentos", "pri": 1, "ex": "No como carne.", "exEn": "I don't eat meat.", "hook": "≈ “carnivore / carnal” (Latin caro)." },
+    { "id": "pollo", "es": "pollo", "en": "chicken", "pron": "POH-yoh", "cat": "alimentos", "pri": 1, "ex": "El pollo está muy rico.", "exEn": "The chicken is very tasty.", "hook": "cf. “poultry / pullet” (Latin pullus)." },
+    { "id": "pescado", "es": "pescado", "en": "fish (food)", "pron": "pehs-KAH-doh", "cat": "alimentos", "pri": 2, "ex": "Hoy hay pescado fresco.", "exEn": "There's fresh fish today.", "hook": "≈ “Pisces / piscine” (Latin piscis)." },
+    { "id": "arroz", "es": "arroz", "en": "rice", "pron": "ah-ROHS", "cat": "alimentos", "pri": 2, "ex": "Arroz con pollo, por favor.", "exEn": "Rice with chicken, please.", "hook": "≈ “rice” (Arabic ar-ruzz)." },
+    { "id": "verdura", "es": "verdura", "en": "vegetable", "pron": "ver-DOO-rah", "cat": "alimentos", "pri": 2, "ex": "Come más verdura.", "exEn": "Eat more vegetables.", "hook": "From verde (green) → greens." },
+    { "id": "sopa", "es": "sopa", "en": "soup", "pron": "SOH-pah", "cat": "alimentos", "pri": 2, "ex": "La sopa está caliente.", "exEn": "The soup is hot.", "hook": "≈ “soup”." },
+    { "id": "postre", "es": "postre", "en": "dessert", "pron": "POHS-treh", "cat": "alimentos", "pri": 3, "ex": "¿Quieres un postre?", "exEn": "Do you want a dessert?", "hook": "cf. “post-” — it comes after the meal." },
+    { "id": "cerveza", "es": "cerveza", "en": "beer", "pron": "ser-VEH-sah", "cat": "alimentos", "pri": 2, "ex": "Una cerveza fría, por favor.", "exEn": "A cold beer, please.", "hook": "Latin cervisia = beer." },
+    { "id": "vino", "es": "vino", "en": "wine", "pron": "VEE-noh", "cat": "alimentos", "pri": 2, "ex": "¿Prefieres vino tinto?", "exEn": "Do you prefer red wine?", "hook": "≈ “vino / wine”; SK víno." },
+    { "id": "te-bebida", "es": "té", "en": "tea", "pron": "teh", "cat": "alimentos", "pri": 2, "ex": "¿Quieres un té?", "exEn": "Would you like a tea?", "hook": "= “tea”." },
+    { "id": "azucar", "es": "azúcar", "en": "sugar", "pron": "ah-SOO-kar", "cat": "alimentos", "pri": 2, "ex": "Sin azúcar, por favor.", "exEn": "Without sugar, please.", "hook": "≈ “sugar / saccharine” (Arabic)." },
+    { "id": "sal", "es": "sal", "en": "salt", "pron": "sahl", "cat": "alimentos", "pri": 2, "ex": "Le falta sal.", "exEn": "It needs salt.", "hook": "≈ “saline / salt”; SK soľ." },
+
+    { "id": "rojo", "es": "rojo", "en": "red", "pron": "ROH-hoh", "cat": "colores", "pri": 1, "ex": "Me gusta el vestido rojo.", "exEn": "I like the red dress.", "hook": "cf. “rouge” (Fr) = red." },
+    { "id": "azul", "es": "azul", "en": "blue", "pron": "ah-SOOL", "cat": "colores", "pri": 1, "ex": "El cielo está azul.", "exEn": "The sky is blue.", "hook": "cf. “azure” = sky blue." },
+    { "id": "verde", "es": "verde", "en": "green", "pron": "VER-deh", "cat": "colores", "pri": 1, "ex": "El semáforo está en verde.", "exEn": "The light is green.", "hook": "≈ “verdant / verdure” = green." },
+    { "id": "amarillo", "es": "amarillo", "en": "yellow", "pron": "ah-mah-REE-yoh", "cat": "colores", "pri": 2, "ex": "El sol es amarillo.", "exEn": "The sun is yellow.", "hook": "Mnemonic: the “Amarillo” sun is yellow." },
+    { "id": "negro", "es": "negro", "en": "black", "pron": "NEH-groh", "cat": "colores", "pri": 1, "ex": "Un café negro, por favor.", "exEn": "A black coffee, please.", "hook": "≈ “negative” (Latin niger = black)." },
+    { "id": "blanco", "es": "blanco", "en": "white", "pron": "BLAHN-koh", "cat": "colores", "pri": 1, "ex": "Quiero vino blanco.", "exEn": "I want white wine.", "hook": "≈ “blank” — a blank page is white." },
+    { "id": "gris", "es": "gris", "en": "grey", "pron": "grees", "cat": "colores", "pri": 2, "ex": "Hoy el cielo está gris.", "exEn": "Today the sky is grey.", "hook": "cf. “grizzle / grizzled” = grey." },
+
+    { "id": "sol", "es": "sol", "en": "sun", "pron": "sohl", "cat": "clima", "pri": 1, "ex": "Hace mucho sol.", "exEn": "It's very sunny.", "hook": "≈ “solar”; SK slnko." },
+    { "id": "lluvia", "es": "lluvia", "en": "rain", "pron": "YOO-vyah", "cat": "clima", "pri": 2, "ex": "Viene la lluvia.", "exEn": "The rain is coming.", "hook": "≈ “pluvial” (Latin pluvia)." },
+    { "id": "viento", "es": "viento", "en": "wind", "pron": "VYEHN-toh", "cat": "clima", "pri": 2, "ex": "Hace mucho viento.", "exEn": "It's very windy.", "hook": "≈ “vent / ventilate” (Latin ventus)." },
+    { "id": "nube", "es": "nube", "en": "cloud", "pron": "NOO-beh", "cat": "clima", "pri": 3, "ex": "No hay ni una nube.", "exEn": "There isn't a single cloud.", "hook": "≈ “nebula / nimbus”." },
+    { "id": "nieve", "es": "nieve", "en": "snow", "pron": "NYEH-veh", "cat": "clima", "pri": 3, "ex": "Me gusta la nieve.", "exEn": "I like the snow.", "hook": "≈ “nival / Nevada” (snow-capped)." },
+
+    { "id": "cabeza", "es": "cabeza", "en": "head", "pron": "kah-BEH-sah", "cat": "cuerpo", "pri": 2, "ex": "Me duele la cabeza.", "exEn": "My head hurts.", "hook": "≈ “capital” (head-city); Latin caput." },
+    { "id": "mano", "es": "mano", "en": "hand", "pron": "MAH-noh", "cat": "cuerpo", "pri": 1, "ex": "Dame la mano.", "exEn": "Give me your hand.", "hook": "≈ “manual / manicure” (Latin manus)." },
+    { "id": "ojo", "es": "ojo", "en": "eye", "pron": "OH-hoh", "cat": "cuerpo", "pri": 2, "ex": "Me entró algo en el ojo.", "exEn": "Something got in my eye.", "hook": "≈ “ocular / oculist” (Latin oculus)." },
+    { "id": "pie", "es": "pie", "en": "foot", "pron": "pyeh", "cat": "cuerpo", "pri": 2, "ex": "Me duele el pie.", "exEn": "My foot hurts.", "hook": "≈ “pedal / pedestrian” (Latin pes)." },
+    { "id": "corazon", "es": "corazón", "en": "heart", "pron": "koh-rah-SOHN", "cat": "cuerpo", "pri": 2, "ex": "Te quiero con todo el corazón.", "exEn": "I love you with all my heart.", "hook": "≈ “cordial / coronary / courage” (Latin cor)." },
+
+    { "id": "mesa", "es": "mesa", "en": "table", "pron": "MEH-sah", "cat": "objetos", "pri": 1, "ex": "La comida está en la mesa.", "exEn": "The food is on the table.", "hook": "≈ “mesa” — a flat-topped hill." },
+    { "id": "silla", "es": "silla", "en": "chair", "pron": "SEE-yah", "cat": "objetos", "pri": 2, "ex": "Siéntate en esta silla.", "exEn": "Sit in this chair.", "hook": "cf. “saddle / sella” (Latin sella)." },
+    { "id": "puerta", "es": "puerta", "en": "door", "pron": "PWEHR-tah", "cat": "objetos", "pri": 1, "ex": "Cierra la puerta, por favor.", "exEn": "Close the door, please.", "hook": "≈ “portal / port” (Latin porta)." },
+    { "id": "ventana", "es": "ventana", "en": "window", "pron": "ven-TAH-nah", "cat": "objetos", "pri": 2, "ex": "Abre la ventana.", "exEn": "Open the window.", "hook": "From viento (wind) → an opening for air." },
+    { "id": "cama", "es": "cama", "en": "bed", "pron": "KAH-mah", "cat": "objetos", "pri": 1, "ex": "Voy a la cama.", "exEn": "I'm going to bed.", "hook": "Mnemonic: lie ‘calm’ (cama) in bed." },
+    { "id": "llave", "es": "llave", "en": "key", "pron": "YAH-veh", "cat": "objetos", "pri": 2, "ex": "No encuentro mi llave.", "exEn": "I can't find my key.", "hook": "≈ “clef / clavicle” (Latin clavis = key)." },
+
+    { "id": "abrir", "es": "abrir", "en": "to open", "pron": "ah-BREER", "cat": "acciones", "pri": 1, "ex": "¿Puedes abrir la puerta?", "exEn": "Can you open the door?", "hook": "≈ “aperture / aperitif” (Latin aperire)." },
+    { "id": "cerrar", "es": "cerrar", "en": "to close", "pron": "seh-RAR", "cat": "acciones", "pri": 1, "ex": "Voy a cerrar la ventana.", "exEn": "I'm going to close the window.", "hook": "Latin serare (to bolt); cf. “serrate”." },
+    { "id": "comprar", "es": "comprar", "en": "to buy", "pron": "kohm-PRAR", "cat": "acciones", "pri": 1, "ex": "Necesito comprar pan.", "exEn": "I need to buy bread.", "hook": "Mnemonic: a “compra” is a purchase." },
+    { "id": "pagar", "es": "pagar", "en": "to pay", "pron": "pah-GAR", "cat": "acciones", "pri": 1, "ex": "¿Puedo pagar con tarjeta?", "exEn": "Can I pay by card?", "hook": "≈ “pay” (Latin pacare; Fr payer)." },
+    { "id": "esperar", "es": "esperar", "en": "to wait / hope", "pron": "ehs-peh-RAR", "cat": "acciones", "pri": 1, "ex": "Espérame un momento.", "exEn": "Wait for me a moment.", "hook": "cf. “esperance” (hope); “Esperanto”." },
+    { "id": "buscar", "es": "buscar", "en": "to look for", "pron": "boos-KAR", "cat": "acciones", "pri": 1, "ex": "Voy a buscar un taxi.", "exEn": "I'm going to look for a taxi.", "hook": "Mnemonic: “busca” = a search/quest." }
+  ]
+}

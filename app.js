@@ -705,7 +705,7 @@
   on($("browse-back"), "click", renderBrowse);
 
   // ── More / settings ──────────────────────────────────────
-  function renderMore() { renderReminder(); updateOfflineUI(); }
+  function renderMore() { renderReminder(); updateOfflineUI(); renderLibrary(); }
 
   // ── Daily reminder ───────────────────────────────────────
   // A static PWA can't guarantee a background push without a server. We use the
@@ -842,7 +842,8 @@
   var OFFLINE_KEY = "habla.offline.v1";
   var offline = { running: false, done: 0, failed: 0, total: WORDS.length };
 
-  function offlineComplete() { try { return localStorage.getItem(OFFLINE_KEY) === AUDIO_CACHE; } catch (e) { return false; } }
+  function savedAudioCount() { try { return parseInt(localStorage.getItem(OFFLINE_KEY) || "0", 10) || 0; } catch (e) { return 0; } }
+  function offlineComplete() { return savedAudioCount() >= WORDS.length; }
   function cachesAvailable() { return "caches" in window; }
 
   function updateOfflineUI() {
@@ -904,7 +905,7 @@
     }).then(function () {
       offline.running = false;
       if (offline.failed === 0) {
-        try { localStorage.setItem(OFFLINE_KEY, AUDIO_CACHE); } catch (e) {}
+        try { localStorage.setItem(OFFLINE_KEY, String(offline.done)); } catch (e) {}
         if (announced) toast("✓ All audio saved for offline");
       } else if (announced) {
         toast(offline.failed + " clip(s) didn't save — tap “Download” to retry");
@@ -914,7 +915,126 @@
   }
 
   on($("offline-download"), "click", function () { prefetchAudio(true); });
-  window.addEventListener("online", function () { if (!offlineComplete()) prefetchAudio(false); updateOfflineUI(); });
+  window.addEventListener("online", function () { if (!offlineComplete()) prefetchAudio(false); updateOfflineUI(); renderConn(); });
+
+  // ── Word packs (downloadable expansion sets) ─────────────
+  // Extra themed sets of words+sentences+audio live in packs/*.json. Downloading
+  // one (when online) merges its words into every deck and its audio into the
+  // offline cache; the pack content is stored locally so it works offline after.
+  var PACKS_INSTALLED_KEY = "habla.packs.installed";
+  var PACKS_DATA_KEY = "habla.packs.data";
+  var packsIndex = null;      // cached packs/index.json
+  var mergedPackIds = {};     // packs already merged into WORDS this session
+
+  function getInstalledPacks() { try { return JSON.parse(localStorage.getItem(PACKS_INSTALLED_KEY)) || []; } catch (e) { return []; } }
+  function getPackStore() { try { return JSON.parse(localStorage.getItem(PACKS_DATA_KEY)) || {}; } catch (e) { return {}; } }
+  function savePacks(store, installed) {
+    try {
+      localStorage.setItem(PACKS_DATA_KEY, JSON.stringify(store));
+      localStorage.setItem(PACKS_INSTALLED_KEY, JSON.stringify(installed));
+    } catch (e) { toast("Couldn't save pack — storage may be full"); }
+  }
+  function setWordCount() { var el = $("word-count"); if (el) el.textContent = WORDS.length; }
+
+  function mergePackData(pack) {
+    if (mergedPackIds[pack.id]) return;
+    if (pack.categories) Object.keys(pack.categories).forEach(function (k) { if (!CATEGORIES[k]) CATEGORIES[k] = pack.categories[k]; });
+    var have = {}; WORDS.forEach(function (w) { have[w.id] = true; });
+    (pack.words || []).forEach(function (w) { if (!have[w.id]) WORDS.push(w); });
+    mergedPackIds[pack.id] = true;
+  }
+
+  function mergeInstalledPacks() {
+    var installed = getInstalledPacks(), store = getPackStore();
+    installed.forEach(function (id) { if (store[id]) mergePackData({ id: id, categories: store[id].categories, words: store[id].words }); });
+    setWordCount();
+  }
+
+  function connInfo() {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return { known: false };
+    return { known: true, wifi: c.type === "wifi", cellular: c.type === "cellular", saveData: !!c.saveData };
+  }
+  function renderConn() {
+    var el = $("packs-conn"); if (!el) return;
+    var c = connInfo();
+    if (!navigator.onLine) { el.textContent = "You're offline — connect to Wi-Fi to add packs. Installed packs still work offline."; return; }
+    if (c.wifi) el.textContent = "You're on Wi-Fi — good to download.";
+    else if (c.saveData) el.textContent = "Data Saver is on — packs are small (~200–350 KB) but use mobile data.";
+    else if (c.cellular) el.textContent = "You're on mobile data — packs are small (~200–350 KB) but will use your data.";
+    else el.textContent = "Add more themed words below (downloads use your connection).";
+  }
+
+  function installPack(meta) {
+    if (!navigator.onLine) { toast("Connect to the internet to download packs"); return; }
+    var btn = document.querySelector('[data-pack="' + meta.id + '"]');
+    if (btn) { btn.disabled = true; btn.textContent = "Downloading…"; }
+    fetch(meta.file, { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (pack) {
+      var store = getPackStore(), installed = getInstalledPacks();
+      store[pack.id] = { name: pack.name, description: pack.description, categories: pack.categories || {}, words: pack.words || [] };
+      if (installed.indexOf(pack.id) === -1) installed.push(pack.id);
+      savePacks(store, installed);
+      mergePackData(pack); setWordCount();
+      toast("✓ " + pack.name + " added — " + (pack.words || []).length + " new words");
+      renderLibrary(); renderHome();
+      prefetchAudio(true);   // pull the new clips into the offline cache
+    }).catch(function () { toast("Couldn't download that pack — try again"); renderLibrary(); });
+  }
+
+  function uninstallPack(id) {
+    var store = getPackStore(), installed = getInstalledPacks();
+    var words = store[id] ? store[id].words : [];
+    var cats = store[id] ? Object.keys(store[id].categories || {}) : [];
+    delete store[id];
+    installed = installed.filter(function (x) { return x !== id; });
+    savePacks(store, installed);
+    var ids = {}; words.forEach(function (w) { ids[w.id] = true; });
+    for (var i = WORDS.length - 1; i >= 0; i--) if (ids[WORDS[i].id]) WORDS.splice(i, 1);
+    cats.forEach(function (k) { if (!WORDS.some(function (w) { return w.cat === k; })) delete CATEGORIES[k]; });
+    delete mergedPackIds[id];
+    setWordCount();
+    toast("Pack removed"); renderLibrary(); renderHome(); updateOfflineUI();
+  }
+
+  function renderLibrary() {
+    var list = $("packs-list"), note = $("packs-note");
+    if (!list) return;
+    renderConn();
+    var installed = getInstalledPacks();
+    function draw(packs) {
+      list.innerHTML = "";
+      packs.forEach(function (p) {
+        var isIn = installed.indexOf(p.id) !== -1;
+        var row = document.createElement("div");
+        row.className = "pack";
+        row.innerHTML = '<div class="pack-text"><b>' + esc(p.name) + '</b><p>' + esc(p.description) + '</p>' +
+          '<span class="pack-meta">' + p.count + " words" + (p.sizeKb ? " · ~" + p.sizeKb + " KB" : "") + "</span></div>";
+        var btn = document.createElement("button");
+        btn.className = "pack-btn" + (isIn ? " installed" : "");
+        btn.setAttribute("data-pack", p.id);
+        btn.textContent = isIn ? "✓ Added" : "Download";
+        on(btn, "click", function () {
+          if (getInstalledPacks().indexOf(p.id) !== -1) {
+            openConfirm({ title: "Remove " + p.name + "?", body: "Its words leave your decks. Your progress on other words is untouched.", confirmLabel: "Remove" },
+              function () { uninstallPack(p.id); });
+          } else installPack(p);
+        });
+        row.appendChild(btn);
+        list.appendChild(row);
+      });
+      note.textContent = installed.length ? installed.length + " pack" + (installed.length > 1 ? "s" : "") + " installed." : "";
+    }
+    if (packsIndex) { draw(packsIndex); return; }
+    if (navigator.onLine) {
+      list.innerHTML = '<p class="rem-note">Loading…</p>';
+      fetch("packs/index.json", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
+        packsIndex = j.packs || []; draw(packsIndex);
+      }).catch(function () { list.innerHTML = '<p class="rem-note">Couldn\'t load the pack list — check your connection.</p>'; });
+    } else {
+      var store = getPackStore();
+      draw(installed.map(function (id) { return { id: id, name: (store[id] && store[id].name) || id, description: "Installed", count: (store[id] && store[id].words.length) || 0 }; }));
+    }
+  }
 
   on($("btn-reset"), "click", function () {
     openConfirm({
@@ -1045,5 +1165,6 @@
   });
 
   // ── Boot ─────────────────────────────────────────────────
+  mergeInstalledPacks();   // fold any previously-downloaded packs into the decks
   renderHome();
 })();

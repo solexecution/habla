@@ -1,0 +1,44 @@
+{
+  "id": "getting-around",
+  "name": "Getting Around",
+  "description": "Directions, transport, places to go, and shopping words for travelling.",
+  "categories": {
+    "direcciones": "Directions",
+    "transporte": "Transport",
+    "viaje": "Places to go",
+    "compras": "Shopping"
+  },
+  "words": [
+    { "id": "izquierda", "es": "izquierda", "en": "left", "pron": "ees-KYEHR-dah", "cat": "direcciones", "pri": 1, "ex": "Gira a la izquierda.", "exEn": "Turn left.", "hook": "Mnemonic: left = izquierda (no Latin cognate — worth drilling)." },
+    { "id": "derecha", "es": "derecha", "en": "right", "pron": "deh-REH-chah", "cat": "direcciones", "pri": 1, "ex": "La tienda está a la derecha.", "exEn": "The store is on the right.", "hook": "≈ “direct / erect” (Latin directus) → right side." },
+    { "id": "derecho", "es": "derecho", "en": "straight ahead", "pron": "deh-REH-choh", "cat": "direcciones", "pri": 2, "ex": "Sigue derecho.", "exEn": "Go straight ahead.", "hook": "Same root as “direct” → straight on." },
+    { "id": "cerca", "es": "cerca", "en": "near", "pron": "SEHR-kah", "cat": "direcciones", "pri": 1, "ex": "El banco está cerca.", "exEn": "The bank is near.", "hook": "cf. “circa” (around / near)." },
+    { "id": "lejos", "es": "lejos", "en": "far", "pron": "LEH-hohs", "cat": "direcciones", "pri": 1, "ex": "El aeropuerto está lejos.", "exEn": "The airport is far.", "hook": "Mnemonic: “lejos” = a long way off." },
+    { "id": "arriba", "es": "arriba", "en": "up / upstairs", "pron": "ah-REE-bah", "cat": "direcciones", "pri": 2, "ex": "El baño está arriba.", "exEn": "The bathroom is upstairs.", "hook": "Mnemonic: “¡Arriba!” = up!" },
+    { "id": "abajo", "es": "abajo", "en": "down / downstairs", "pron": "ah-BAH-hoh", "cat": "direcciones", "pri": 2, "ex": "Te espero abajo.", "exEn": "I'll wait for you downstairs.", "hook": "a + bajo (low) → down; cf. “bass / base”." },
+
+    { "id": "carro", "es": "carro", "en": "car", "pron": "KAH-roh", "cat": "transporte", "pri": 1, "ex": "Voy en carro.", "exEn": "I'm going by car.", "hook": "≈ “car / carriage” (Latin carrus)." },
+    { "id": "autobus", "es": "autobús", "en": "bus", "pron": "ow-toh-BOOS", "cat": "transporte", "pri": 2, "ex": "Tomo el autobús al centro.", "exEn": "I take the bus downtown.", "hook": "= “autobus” (auto + omnibus)." },
+    { "id": "tren", "es": "tren", "en": "train", "pron": "trehn", "cat": "transporte", "pri": 1, "ex": "El tren llega a las ocho.", "exEn": "The train arrives at eight.", "hook": "≈ “train”." },
+    { "id": "avion", "es": "avión", "en": "plane", "pron": "ah-VYOHN", "cat": "transporte", "pri": 2, "ex": "El avión sale tarde.", "exEn": "The plane leaves late.", "hook": "≈ “aviation / avian” (Latin avis = bird)." },
+    { "id": "taxi", "es": "taxi", "en": "taxi", "pron": "TAHK-see", "cat": "transporte", "pri": 1, "ex": "Voy a pedir un taxi.", "exEn": "I'm going to call a taxi.", "hook": "= “taxi” (universal); SK taxík." },
+    { "id": "boleto", "es": "boleto", "en": "ticket", "pron": "boh-LEH-toh", "cat": "transporte", "pri": 2, "ex": "¿Cuánto cuesta el boleto?", "exEn": "How much is the ticket?", "hook": "cf. “ballot” — a little ticket." },
+    { "id": "estacion", "es": "estación", "en": "station", "pron": "ehs-tah-SYOHN", "cat": "transporte", "pri": 2, "ex": "Nos vemos en la estación.", "exEn": "See you at the station.", "hook": "≈ “station”; SK stanica." },
+
+    { "id": "hotel", "es": "hotel", "en": "hotel", "pron": "oh-TEHL", "cat": "viaje", "pri": 1, "ex": "El hotel está lleno.", "exEn": "The hotel is full.", "hook": "= “hotel”; SK hotel." },
+    { "id": "playa", "es": "playa", "en": "beach", "pron": "PLAH-yah", "cat": "viaje", "pri": 2, "ex": "Vamos a la playa.", "exEn": "Let's go to the beach.", "hook": "cf. “playa” — a flat shore (Latin plana)." },
+    { "id": "mercado", "es": "mercado", "en": "market", "pron": "mer-KAH-doh", "cat": "viaje", "pri": 2, "ex": "Compro fruta en el mercado.", "exEn": "I buy fruit at the market.", "hook": "≈ “market / mercantile” (Latin mercatus)." },
+    { "id": "tienda", "es": "tienda", "en": "store / shop", "pron": "TYEHN-dah", "cat": "viaje", "pri": 1, "ex": "La tienda cierra a las nueve.", "exEn": "The store closes at nine.", "hook": "cf. “tent” — a stall stretched open (Latin tendere)." },
+    { "id": "banco", "es": "banco", "en": "bank", "pron": "BAHN-koh", "cat": "viaje", "pri": 1, "ex": "Voy al banco.", "exEn": "I'm going to the bank.", "hook": "≈ “bank”; also a bench (Italian banca)." },
+    { "id": "hospital-lugar", "es": "hospital", "en": "hospital", "pron": "ohs-pee-TAHL", "cat": "viaje", "pri": 2, "ex": "El hospital está cerca.", "exEn": "The hospital is near.", "hook": "= “hospital”; SK špitál." },
+    { "id": "farmacia", "es": "farmacia", "en": "pharmacy", "pron": "far-MAH-syah", "cat": "viaje", "pri": 2, "ex": "Necesito una farmacia.", "exEn": "I need a pharmacy.", "hook": "≈ “pharmacy”; SK farmácia." },
+    { "id": "aeropuerto", "es": "aeropuerto", "en": "airport", "pron": "ah-eh-roh-PWEHR-toh", "cat": "viaje", "pri": 2, "ex": "Voy al aeropuerto.", "exEn": "I'm going to the airport.", "hook": "aero + puerto (port) = airport." },
+
+    { "id": "precio", "es": "precio", "en": "price", "pron": "PREH-syoh", "cat": "compras", "pri": 1, "ex": "¿Cuál es el precio?", "exEn": "What's the price?", "hook": "≈ “price / precious” (Latin pretium)." },
+    { "id": "caro", "es": "caro", "en": "expensive", "pron": "KAH-roh", "cat": "compras", "pri": 1, "ex": "Es muy caro.", "exEn": "It's very expensive.", "hook": "cf. “dear / charge” — costly (Latin carus)." },
+    { "id": "barato", "es": "barato", "en": "cheap", "pron": "bah-RAH-toh", "cat": "compras", "pri": 2, "ex": "Este es más barato.", "exEn": "This one is cheaper.", "hook": "Mnemonic: hunt a “barato” bargain." },
+    { "id": "cuenta", "es": "cuenta", "en": "bill / check", "pron": "KWEHN-tah", "cat": "compras", "pri": 1, "ex": "La cuenta, por favor.", "exEn": "The bill, please.", "hook": "≈ “count / account” — what you owe." },
+    { "id": "tarjeta", "es": "tarjeta", "en": "card", "pron": "tar-HEH-tah", "cat": "compras", "pri": 1, "ex": "¿Aceptan tarjeta?", "exEn": "Do you take card?", "hook": "cf. “carte” — a card." },
+    { "id": "abierto", "es": "abierto", "en": "open", "pron": "ah-BYEHR-toh", "cat": "compras", "pri": 2, "ex": "¿Está abierto?", "exEn": "Is it open?", "hook": "From abrir → “open”; cf. “aperture”." }
+  ]
+}

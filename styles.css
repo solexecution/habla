@@ -153,6 +153,21 @@ header.top { display: flex; align-items: center; gap: 12px; padding: 6px 2px 16p
 .rem-note { margin: 12px 0 0; color: var(--muted); font-size: .8rem; }
 .offline-badge { flex: 0 0 auto; font-weight: 700; font-size: .82rem; color: var(--good); }
 .offline-badge.pending { color: var(--muted); }
+
+/* Word packs */
+.pack { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+.pack + .pack { border-top: 1px solid var(--line); }
+.pack .pack-text { flex: 1 1 auto; min-width: 0; }
+.pack .pack-text b { font-size: .96rem; }
+.pack .pack-text p { margin: 3px 0 0; color: var(--muted); font-size: .8rem; }
+.pack .pack-meta { color: var(--brand-hi); font-size: .74rem; font-weight: 600; }
+.pack .pack-btn {
+  flex: 0 0 auto; appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 700; font-size: .82rem;
+  padding: 9px 14px; border-radius: 11px; background: var(--brand); color: var(--brand-ink);
+}
+.pack .pack-btn.installed { background: var(--card-hi); color: var(--good); border: 1px solid var(--good); }
+.pack .pack-btn:disabled { opacity: .6; cursor: default; }
+.pack .pack-btn.remove { background: none; color: var(--muted); border: 1px solid var(--line); }
 #rem-time {
   font: inherit; font-weight: 700; padding: 9px 12px; border-radius: 11px;
   border: 1px solid var(--line); background: var(--bg-soft); color: var(--text); color-scheme: light dark;

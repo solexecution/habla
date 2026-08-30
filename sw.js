@@ -6,7 +6,7 @@
  *                 (see prefetchAudio in app.js) with progress + retries, so the
  *                 download is complete and visible rather than best-effort. It is
  *                 preserved across shell updates so audio isn't re-downloaded. */
-var CACHE = "habla-v10";
+var CACHE = "habla-v11";
 var AUDIO_CACHE = "habla-audio-v1";
 var ASSETS = [
   "./",
