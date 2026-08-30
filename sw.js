@@ -1,6 +1,6 @@
 /* Hablá service worker — offline-first caching of the app shell.
  * Bump CACHE when any listed asset changes so clients pull the new version. */
-var CACHE = "habla-v2";
+var CACHE = "habla-v3";
 var ASSETS = [
   "./",
   "./index.html",

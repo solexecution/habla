@@ -146,20 +146,35 @@
     else document.documentElement.removeAttribute("data-theme");
     syncThemeColor();
   }
-  function toggleTheme() {
-    var next = effectiveDark() ? "light" : "dark";
-    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
-    applyTheme(next);
-    toast(next === "dark" ? "Dark theme" : "Light theme");
+  function storedThemeChoice() {
+    try { return localStorage.getItem(THEME_KEY) || "system"; } catch (e) { return "system"; }
   }
-  // Keep in sync if the OS theme changes and the user hasn't pinned one.
+  function setTheme(choice) {
+    try {
+      if (choice === "system") localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, choice);
+    } catch (e) {}
+    applyTheme(choice === "system" ? null : choice);
+    renderThemeSeg();
+  }
+  function renderThemeSeg() {
+    var choice = storedThemeChoice();
+    themeSegBtns.forEach(function (b) {
+      b.classList.toggle("active", b.dataset.themeChoice === choice);
+    });
+  }
+  var themeSegBtns = document.querySelectorAll("#theme-seg button");
+  themeSegBtns.forEach(function (b) {
+    on(b, "click", function () { setTheme(b.dataset.themeChoice); });
+  });
+  // Keep in sync if the OS theme changes and the user is on "System".
   if (window.matchMedia) {
     var mq = window.matchMedia("(prefers-color-scheme: dark)");
     var onMq = function () { if (!document.documentElement.getAttribute("data-theme")) syncThemeColor(); };
     if (mq.addEventListener) mq.addEventListener("change", onMq); else if (mq.addListener) mq.addListener(onMq);
   }
   syncThemeColor();
-  on($("btn-theme"), "click", toggleTheme);
+  renderThemeSeg();
 
   // ── In-page confirm modal (replaces native confirm) ──────
   var modalScrim = $("modal-scrim"), modalConfirmCb = null;
@@ -186,10 +201,28 @@
 
   // ── Speech ───────────────────────────────────────────────
   var esVoice = null;
+  // Rank the device's Spanish voices so we speak with the most natural one
+  // available, not just the first match. Neural/enhanced voices win big.
+  function scoreVoice(v) {
+    if (!/^es/i.test(v.lang)) return -1;
+    var n = (v.name || "").toLowerCase();
+    var s = 10;
+    if (/natural|neural|enhanced|premium/.test(n)) s += 8;   // Apple/MS/Google premium
+    if (/online|multilingual/.test(n)) s += 3;               // cloud-backed, higher quality
+    if (/google/.test(n)) s += 4;                            // Google español is very natural
+    if (/microsoft/.test(n)) s += 2;
+    if (/es-es/i.test(v.lang)) s += 2;                       // prefer a clear peninsular default
+    else if (/es-us|es-mx|es-419/i.test(v.lang)) s += 1;
+    return s;
+  }
   function pickVoice() {
     if (!("speechSynthesis" in window)) return;
-    var voices = speechSynthesis.getVoices();
-    esVoice = voices.filter(function (v) { return /^es/i.test(v.lang); })[0] || null;
+    var best = null, bestScore = -1;
+    speechSynthesis.getVoices().forEach(function (v) {
+      var sc = scoreVoice(v);
+      if (sc > bestScore) { bestScore = sc; best = v; }
+    });
+    esVoice = best;
   }
   if ("speechSynthesis" in window) {
     pickVoice();
@@ -200,8 +233,9 @@
     // Strip helper punctuation/ellipsis so TTS reads cleanly.
     var clean = text.replace(/[…]/g, "").replace(/\s+/g, " ").trim();
     var u = new SpeechSynthesisUtterance(clean);
-    u.lang = "es-ES"; u.rate = 0.9;
-    if (esVoice) u.voice = esVoice;
+    u.rate = 0.92; u.pitch = 1;
+    if (esVoice) { u.voice = esVoice; u.lang = esVoice.lang; }
+    else u.lang = "es-ES";
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   }

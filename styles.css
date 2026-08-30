@@ -131,24 +131,6 @@ header.top { display: flex; align-items: center; gap: 12px; padding: 6px 2px 16p
 .title h1 { font-size: 1.3rem; margin: 0; letter-spacing: -.02em; font-weight: 800; }
 .title p { margin: 0; color: var(--muted); font-size: .8rem; }
 
-.icon-btn {
-  flex: 0 0 auto; width: 42px; height: 42px; border-radius: 13px;
-  background: var(--card); border: 1px solid var(--line); color: var(--text);
-  display: grid; place-items: center; cursor: pointer;
-  box-shadow: var(--shadow); transition: transform .1s var(--ease), background .2s, border-color .2s;
-}
-.icon-btn:hover { border-color: var(--line-hi); }
-.icon-btn:active { transform: scale(.94); }
-.icon-btn svg { width: 21px; height: 21px; }
-/* Sun visible in dark theme (offers light), moon visible in light theme (offers dark) */
-.icon-btn .i-sun { display: none; }
-:root[data-theme="dark"] .icon-btn .i-sun { display: block; }
-:root[data-theme="dark"] .icon-btn .i-moon { display: none; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .icon-btn .i-sun { display: block; }
-  :root:not([data-theme="light"]) .icon-btn .i-moon { display: none; }
-}
-
 /* Progress ring + stats */
 .stats {
   display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center;
@@ -315,6 +297,19 @@ footer.credit { text-align: center; color: var(--muted); font-size: .72rem; marg
   opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s var(--ease); z-index: 40; font-size: .85rem; font-weight: 600;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Segmented control (theme picker) ── */
+.segmented {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+  background: var(--card-hi); border: 1px solid var(--line); border-radius: 13px; padding: 4px;
+}
+.segmented button {
+  appearance: none; border: 0; background: none; color: var(--muted);
+  font: inherit; font-weight: 700; font-size: .9rem; padding: 11px 8px; border-radius: 9px;
+  cursor: pointer; transition: background .18s, color .18s, box-shadow .18s;
+}
+.segmented button:hover { color: var(--text); }
+.segmented button.active { background: var(--card); color: var(--brand-hi); box-shadow: var(--shadow); }
 
 /* ── Modal (replaces native confirm) ── */
 .modal-scrim {
