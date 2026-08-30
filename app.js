@@ -214,8 +214,9 @@
     if (/online|multilingual/.test(n)) s += 3;               // cloud-backed, higher quality
     if (/google/.test(n)) s += 4;                            // Google español is very natural
     if (/microsoft/.test(n)) s += 2;
-    if (/es-es/i.test(v.lang)) s += 2;                       // prefer a clear peninsular default
-    else if (/es-us|es-mx|es-419/i.test(v.lang)) s += 1;
+    // Prefer a Latin American accent to match the bundled Mexican audio.
+    if (/es-mx|es-419|es-us/i.test(v.lang)) s += 2;
+    else if (/es-co|es-ar|es-pe|es-cl|es-ve/i.test(v.lang)) s += 1;
     return s;
   }
   function pickVoice() {
@@ -238,7 +239,7 @@
     var u = new SpeechSynthesisUtterance(clean);
     u.rate = 0.92; u.pitch = 1;
     if (esVoice) { u.voice = esVoice; u.lang = esVoice.lang; }
-    else u.lang = "es-ES";
+    else u.lang = "es-MX";
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   }

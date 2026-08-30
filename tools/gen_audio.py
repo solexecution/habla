@@ -13,7 +13,7 @@ Usage:    python tools/gen_audio.py           # from the project root
 """
 import asyncio, json, os, subprocess, sys, shutil, tempfile
 
-VOICE = "es-ES-ElviraNeural"   # natural peninsular Spanish female voice
+VOICE = "es-MX-DaliaNeural"    # natural Latin American (Mexican) Spanish female voice
 RATE = "-6%"                    # a touch slower for learners
 CONCURRENCY = 8
 
