@@ -73,9 +73,12 @@ a **Words** browser to read any theme, and tap-to-hear pronunciation on every wo
 
 ## Audio
 
-Pronunciation uses **pre-recorded human-quality neural audio** — one clip per
-word in `audio/<id>.mp3` (~1.3 MB for all 187, cached for offline). If a clip is
-ever missing or blocked, playback falls back to the device's Spanish
+Pronunciation uses **pre-recorded human-quality neural audio** — two clips per
+word: the word itself (`audio/<id>.mp3`) and its full example sentence
+(`audio/s-<id>.mp3`). On a flashcard the front speaker reads the **word**; flipping
+to the answer (and the back speaker) reads the **whole sentence** in context.
+About 3.6 MB for all clips, cached for offline. If a clip is ever missing or
+blocked (e.g. custom cards), playback falls back to the device's Spanish
 text-to-speech voice (the app picks the most natural voice installed).
 
 Regenerate the clips with the free Microsoft `edge-tts` neural voices:

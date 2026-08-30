@@ -244,20 +244,31 @@
     speechSynthesis.speak(u);
   }
 
-  // Prefer the bundled human-quality recording (audio/<id>.mp3); if it's missing
-  // or blocked, fall back to the device's Spanish TTS voice so audio always works.
+  // Prefer the bundled human-quality recordings (audio/<id>.mp3 for the word,
+  // audio/s-<id>.mp3 for its example sentence). Fall back to the device's Spanish
+  // TTS voice so audio always works (custom cards, missing clips, etc.).
   var audioCache = {};
-  function playWord(w) {
-    if (!w) return;
-    if (!w.id) { speak(w.es); return; }
+  function playClip(url, onFail) {
     try {
-      var a = audioCache[w.id];
-      if (!a) { a = new Audio("audio/" + w.id + ".mp3"); audioCache[w.id] = a; }
-      a.onerror = function () { speak(w.es); };
+      var a = audioCache[url];
+      if (!a) { a = new Audio(url); audioCache[url] = a; }
+      a.onerror = function () { if (onFail) onFail(); };
       a.currentTime = 0;
       var p = a.play();
-      if (p && p.catch) p.catch(function () { speak(w.es); });
-    } catch (e) { speak(w.es); }
+      if (p && p.catch) p.catch(function () { if (onFail) onFail(); });
+    } catch (e) { if (onFail) onFail(); }
+  }
+  function playWord(w) {
+    if (!w) return;
+    if (!w.id || w.custom) { speak(w.es); return; }
+    playClip("audio/" + w.id + ".mp3", function () { speak(w.es); });
+  }
+  // Reads the whole example sentence in context (with the word as fallback).
+  function playSentence(w) {
+    if (!w) return;
+    if (!w.ex) { playWord(w); return; }
+    if (!w.id || w.custom) { speak(w.ex); return; }
+    playClip("audio/s-" + w.id + ".mp3", function () { speak(w.ex); });
   }
 
   // ── Tabs / routing ───────────────────────────────────────
@@ -364,7 +375,7 @@
     if (flipped) {
       $("rate-row").classList.add("show");
       $("flip-row").classList.add("hidden");
-      playWord(deck[idx]);
+      playSentence(deck[idx]);   // read the whole example sentence on reveal
     }
   }
 
@@ -374,7 +385,7 @@
   });
   on($("btn-flip"), "click", flip);
   on($("fc-speak-front"), "click", function (e) { e.stopPropagation(); playWord(deck[idx]); });
-  on($("fc-speak-back"), "click", function (e) { e.stopPropagation(); playWord(deck[idx]); });
+  on($("fc-speak-back"), "click", function (e) { e.stopPropagation(); playSentence(deck[idx]); });
 
   document.querySelectorAll("#rate-row .btn").forEach(function (b) {
     on(b, "click", function () {
@@ -857,13 +868,23 @@
   var offline = { running: false, done: 0, failed: 0, total: WORDS.length };
 
   function savedAudioCount() { try { return parseInt(localStorage.getItem(OFFLINE_KEY) || "0", 10) || 0; } catch (e) { return 0; } }
-  function offlineComplete() { return savedAudioCount() >= WORDS.length; }
+  // Every bundled clip: the word, plus its example sentence. Custom cards have none.
+  function clipUrls() {
+    var out = [];
+    WORDS.forEach(function (w) {
+      if (!w.id || w.custom) return;
+      out.push("audio/" + w.id + ".mp3");
+      if (w.ex) out.push("audio/s-" + w.id + ".mp3");
+    });
+    return out;
+  }
+  function offlineComplete() { return savedAudioCount() >= clipUrls().length; }
   function cachesAvailable() { return "caches" in window; }
 
   function updateOfflineUI() {
     var sub = $("offline-sub"), bar = $("offline-bar"), badge = $("offline-badge"), btn = $("offline-download"), wrap = $("offline-bar-wrap");
     if (!sub) return;
-    var total = WORDS.length;
+    var total = clipUrls().length;
     if (!cachesAvailable()) {
       sub.textContent = "This browser can't store audio offline; playback needs a connection.";
       wrap.classList.add("hidden"); btn.classList.add("hidden"); badge.textContent = "";
@@ -876,7 +897,7 @@
       badge.className = "offline-badge pending"; badge.textContent = "…";
       btn.disabled = true; btn.textContent = "Downloading…";
     } else if (offlineComplete()) {
-      sub.textContent = "All " + total + " pronunciation clips are saved on this device (~1.3 MB).";
+      sub.textContent = "All " + total + " clips (words + sentences) are saved on this device.";
       bar.style.width = "100%";
       badge.className = "offline-badge"; badge.textContent = "✓ Ready";
       btn.disabled = false; btn.textContent = "Re-check";
@@ -886,7 +907,7 @@
       badge.className = "offline-badge pending"; badge.textContent = "offline";
       btn.disabled = true; btn.textContent = "Download for offline";
     } else {
-      sub.textContent = "Download all audio so pronunciations work with no signal (~1.3 MB).";
+      sub.textContent = "Download all word + sentence audio so it works with no signal (~3.6 MB).";
       bar.style.width = (offline.done / total * 100) + "%";
       badge.className = "offline-badge pending"; badge.textContent = "";
       btn.disabled = false; btn.textContent = "Download for offline";
@@ -903,7 +924,7 @@
     updateOfflineUI();
 
     caches.open(AUDIO_CACHE).then(function (cache) {
-      var urls = WORDS.map(function (w) { return "audio/" + w.id + ".mp3"; });
+      var urls = clipUrls();
       var i = 0;
       function worker() {
         if (i >= urls.length) return Promise.resolve();
