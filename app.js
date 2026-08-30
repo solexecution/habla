@@ -350,6 +350,7 @@
     $("fc-pron2").textContent = w.es + " · " + w.pron;
     $("fc-ex-es").textContent = w.ex;
     $("fc-ex-en").textContent = w.exEn;
+    $("fc-hook").textContent = w.hook || "";
 
     $("learn-count").textContent = "Card " + (idx + 1) + " of " + deck.length;
     $("learn-progress").style.width = (idx / deck.length * 100) + "%";
@@ -539,20 +540,20 @@
     if (rAnswered) return;
     var w = rDeck[rIdx], inp = $("rc-input"), fb = $("rc-feedback");
     if (!normalize(inp.value)) return;
-    var grade;
+    var grade, hookHtml = w.hook ? "<span class=\"ex\">💡 " + esc(w.hook) + "</span>" : "";
     if (stripEdges(inp.value) === stripEdges(w.es)) {
       grade = "good"; inp.classList.add("ok"); fb.className = "rc-feedback ok";
-      fb.textContent = "¡Correcto! ✓";
+      fb.innerHTML = "¡Correcto! ✓" + hookHtml;
     } else if (normalize(inp.value) === normalize(w.es)) {
       grade = "good"; inp.classList.add("ok"); fb.className = "rc-feedback close";
-      fb.innerHTML = "Casi perfecto — cuida los acentos: <span class=\"ans\">" + esc(w.es) + "</span>";
+      fb.innerHTML = "Casi perfecto — cuida los acentos: <span class=\"ans\">" + esc(w.es) + "</span>" + hookHtml;
     } else if (levenshtein(normalize(inp.value), normalize(w.es)) <= (normalize(w.es).length <= 5 ? 1 : 2)) {
       grade = "hard"; inp.classList.add("bad"); fb.className = "rc-feedback close";
-      fb.innerHTML = "Muy cerca. Respuesta: <span class=\"ans\">" + esc(w.es) + "</span>";
+      fb.innerHTML = "Muy cerca. Respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" + hookHtml;
     } else {
       grade = "again"; inp.classList.add("bad"); fb.className = "rc-feedback bad";
       fb.innerHTML = "La respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" +
-        "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>";
+        "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>" + hookHtml;
     }
     rAnswered = true; inp.disabled = true;
     playWord(w); schedule(w, grade);
@@ -564,7 +565,8 @@
     var w = rDeck[rIdx], inp = $("rc-input"), fb = $("rc-feedback");
     inp.classList.add("bad"); fb.className = "rc-feedback bad";
     fb.innerHTML = "La respuesta: <span class=\"ans\">" + esc(w.es) + "</span>" +
-      "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>";
+      "<span class=\"ex\">" + esc(w.ex) + " — " + esc(w.exEn) + "</span>" +
+      (w.hook ? "<span class=\"ex\">💡 " + esc(w.hook) + "</span>" : "");
     rAnswered = true; inp.disabled = true;
     playWord(w); schedule(w, "again");
     $("rc-check").textContent = "Next →";
@@ -582,6 +584,7 @@
     $("rh-en").textContent = w.en.replace(/…/g, "");
     $("rh-es").textContent = w.es;
     $("rh-pron").textContent = w.pron;
+    $("rh-hook").textContent = w.hook || "";
     $("rh-answer").classList.add("hidden");
     $("rh-reveal-row").classList.remove("hidden");
     $("rh-rate").classList.remove("show");
@@ -693,7 +696,8 @@
         '<span class="known">' + (isKnown(w) ? "✓" : "") + "</span>" +
         '<span class="en">' + w.en + "</span>" +
         '<span class="pron">' + w.pron + "</span>" +
-        '<span class="wex"><b>' + w.ex + "</b> — " + w.exEn + "</span>";
+        '<span class="wex"><b>' + w.ex + "</b> — " + w.exEn + "</span>" +
+        (w.hook ? '<span class="whook">💡 ' + w.hook + "</span>" : "");
       on(el, "click", function () { playWord(w); });
       box.appendChild(el);
     });
@@ -739,7 +743,7 @@
       if (Notification.permission === "granted") {
         note.textContent = triggersSupported()
           ? "On — you'll get a reminder at " + fmt12(reminder.time) + " each day, even when the app is closed."
-          : "On — a reminder shows at " + fmt12(reminder.time) + " while the app is open. Install Hablá (Android/Chrome) for reminders when it's closed; on iPhone, add it to your Home Screen first.";
+          : "On — a reminder shows at " + fmt12(reminder.time) + " while the app is open. Install Hablá to your home screen (browser menu → Install app) to get reminders when it's closed.";
       } else {
         note.textContent = "Notifications are blocked. Turn them on for this site in your browser settings, then toggle again.";
       }
@@ -876,7 +880,7 @@
   });
   on(installBtn, "click", function () {
     if (!deferredPrompt) {
-      $("install-text").textContent = "On iPhone/iPad: tap the Share button, then “Add to Home Screen.” On Android: use your browser menu → “Install app.”";
+      $("install-text").textContent = "On Android: open your browser menu (⋮) and tap “Install app” or “Add to home screen.”";
       return;
     }
     deferredPrompt.prompt();

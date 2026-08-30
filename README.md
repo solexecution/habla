@@ -39,9 +39,12 @@ lightweight SM-2-style scheduler:
    highest-payoff vocabulary lands before the long tail. A day streak keeps you
    honest.
 
-Every entry has `{ id, es, en, pron, cat, ex, exEn, pri }` — Spanish, English,
-pronunciation, theme, an example sentence with its translation, and a frequency
-tier.
+Every entry has `{ id, es, en, pron, cat, ex, exEn, pri, hook }` — Spanish,
+English, pronunciation, theme, an example sentence with its translation, a
+frequency tier, and a **memory hook**: a mnemonic linking the Spanish to an
+English cognate and/or a genuine Slovak look-alike (e.g. *escuela* ≈ SK *škola*,
+*madre* ≈ SK *matka*, *teléfono* ≈ SK *telefón*, *poder* ≈ "potent/power").
+Hooks show on the flashcard back, in Recall feedback, and in the word browser.
 
 **Recall** is the productive-practice mode — the highest-leverage step, since
 *generating* an answer builds far stronger memory than recognising one:

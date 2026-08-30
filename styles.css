@@ -256,6 +256,13 @@ nav.tabs button.active svg { transform: translateY(-1px) scale(1.06); }
 }
 .face .example .ex-es { font-weight: 600; font-size: 1rem; }
 .face .example .ex-en { color: var(--muted); font-size: .82rem; font-style: italic; }
+.hook {
+  font-size: .82rem; color: var(--muted); line-height: 1.35; max-width: 100%;
+  padding: 2px 6px;
+}
+.hook::before { content: "💡 "; }
+.hook:empty { display: none; }
+.face .hook { margin-top: -2px; }
 .face .hint { position: absolute; bottom: 16px; color: var(--muted); font-size: .74rem; }
 .face.back { transform: rotateY(180deg); }
 .speak {
@@ -373,6 +380,7 @@ nav.tabs button.active svg { transform: translateY(-1px) scale(1.06); }
 .word .pron { grid-column: 1 / -1; color: var(--brand-hi); font-size: .8rem; font-style: italic; }
 .word .wex { grid-column: 1 / -1; color: var(--muted); font-size: .82rem; margin-top: 2px; }
 .word .wex b { color: var(--text); font-weight: 600; font-style: normal; }
+.word .whook { grid-column: 1 / -1; color: var(--brand-hi); font-size: .8rem; margin-top: 3px; }
 .word .known { color: var(--good); font-size: .8rem; font-weight: 800; align-self: center; }
 
 .empty { text-align: center; color: var(--muted); padding: 40px 10px; animation: rise .32s var(--ease) both; }
