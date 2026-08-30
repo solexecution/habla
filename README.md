@@ -29,11 +29,19 @@ repetition** — reviewing each word just before you'd forget it. Hablá uses a
 lightweight SM-2-style scheduler:
 
 1. **Flip & rate.** See the Spanish, guess, flip the card, then rate yourself
-   *Again / Hard / Good*.
+   *Again / Hard / Good*. The back shows the meaning **and a short example
+   sentence** — words learned in context stick far better than words in isolation.
 2. **Words come back on a schedule.** *Good* pushes a word further out; *Hard*
    keeps it close; *Again* resurfaces it in the same session.
 3. **Sessions mix due reviews with new words**, capped at 12 cards so a round
-   stays short enough to actually do daily. A day streak keeps you honest.
+   stays short enough to actually do daily. New words are introduced
+   **highest-frequency first** (each entry carries a `pri` tier) so the
+   highest-payoff vocabulary lands before the long tail. A day streak keeps you
+   honest.
+
+Every entry has `{ id, es, en, pron, cat, ex, exEn, pri }` — Spanish, English,
+pronunciation, theme, an example sentence with its translation, and a frequency
+tier.
 
 There's also a **Quiz** mode (multiple choice, both directions) for a quick check,
 a **Words** browser to read any theme, and tap-to-hear pronunciation via the
@@ -51,10 +59,25 @@ device's Spanish text-to-speech voice.
   Enter to confirm); notices use a toast.
 - Reduced-motion aware, safe-area aware, and fully keyboard-navigable.
 
+## Audio
+
+Pronunciation uses **pre-recorded human-quality neural audio** — one clip per
+word in `audio/<id>.mp3` (~1.3 MB for all 187, cached for offline). If a clip is
+ever missing or blocked, playback falls back to the device's Spanish
+text-to-speech voice (the app picks the most natural voice installed).
+
+Regenerate the clips with the free Microsoft `edge-tts` neural voices:
+
+```bash
+pip install edge-tts            # ffmpeg optional, used to trim/normalise
+node -e "const{WORDS}=require('./words.js');require('fs').writeFileSync('tools/_words.json',JSON.stringify(WORDS.map(w=>({id:w.id,es:w.es}))))"
+python tools/gen_audio.py        # writes audio/<id>.mp3, idempotent
+```
+
 ## Offline & install
 
-- A **service worker** (`sw.js`) caches the whole app shell on first load, so it
-  runs with no signal afterward.
+- A **service worker** (`sw.js`) caches the whole app shell **and all audio** on
+  first load, so it runs with no signal afterward.
 - Progress is stored in `localStorage` on the device — nothing is uploaded.
 - **Install to your home screen:** on Android use the browser menu → *Install
   app*; on iPhone/iPad use Share → *Add to Home Screen*. It then launches
@@ -81,11 +104,13 @@ spanish-pwa/
 ├── index.html            app shell + tab views
 ├── styles.css            styling (dark & light, safe-area aware)
 ├── app.js                spaced-repetition, quiz, browse, install, offline logic
-├── words.js              the 187-word dataset (es / en / pronunciation / theme)
-├── sw.js                 service worker (offline caching)
+├── words.js              the 187-word dataset (id / es / en / pron / theme / example / freq)
+├── sw.js                 service worker (offline caching of shell + audio)
 ├── manifest.webmanifest  PWA manifest
+├── audio/                187 pre-recorded neural pronunciation clips (<id>.mp3)
 ├── icons/                app icons (192/512 maskable + Apple touch)
-└── tools/gen_icons.py    regenerates the icons (pure stdlib, no Pillow)
+├── tools/gen_icons.py    regenerates the icons (pure stdlib, no Pillow)
+└── tools/gen_audio.py    regenerates the audio via edge-tts neural voices
 ```
 
 ## Editing the word list

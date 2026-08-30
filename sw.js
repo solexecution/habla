@@ -1,6 +1,6 @@
-/* Hablá service worker — offline-first caching of the app shell.
+/* Hablá service worker — offline-first caching of the app shell + audio.
  * Bump CACHE when any listed asset changes so clients pull the new version. */
-var CACHE = "habla-v3";
+var CACHE = "habla-v4";
 var ASSETS = [
   "./",
   "./index.html",
@@ -13,11 +13,24 @@ var ASSETS = [
   "./icons/apple-touch-icon.png"
 ];
 
+// Derive the audio clip list straight from the word data so it never drifts.
+var AUDIO = [];
+try {
+  importScripts("./words.js"); // defines global WORDS (a lexical const)
+  if (typeof WORDS !== "undefined" && WORDS) AUDIO = WORDS.map(function (w) { return "./audio/" + w.id + ".mp3"; });
+} catch (e) { /* audio just won't be precached; runtime caching still applies */ }
+
 self.addEventListener("install", function (e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () {
-      return self.skipWaiting();
-    })
+    caches.open(CACHE).then(function (c) {
+      // Shell must all cache (fail install if not). Audio is best-effort so one
+      // missing clip never blocks the install.
+      return c.addAll(ASSETS).then(function () {
+        return Promise.all(AUDIO.map(function (url) {
+          return c.add(url).catch(function () { /* skip a missing clip */ });
+        }));
+      });
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 

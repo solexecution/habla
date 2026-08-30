@@ -104,6 +104,9 @@
       else if (c.due <= now) due.push(w);
     });
     shuffle(due); shuffle(fresh);
+    // Introduce brand-new words highest-frequency first (pri 1 → 3). shuffle
+    // above randomizes within a tier; the stable sort keeps that order.
+    fresh.sort(function (a, b) { return (a.pri || 2) - (b.pri || 2); });
     var deck = due.concat(fresh).slice(0, SESSION_SIZE);
     if (deck.length === 0) { // all caught up → light review of soonest-due
       deck = WORDS.slice().sort(function (a, b) {
@@ -240,6 +243,22 @@
     speechSynthesis.speak(u);
   }
 
+  // Prefer the bundled human-quality recording (audio/<id>.mp3); if it's missing
+  // or blocked, fall back to the device's Spanish TTS voice so audio always works.
+  var audioCache = {};
+  function playWord(w) {
+    if (!w) return;
+    if (!w.id) { speak(w.es); return; }
+    try {
+      var a = audioCache[w.id];
+      if (!a) { a = new Audio("audio/" + w.id + ".mp3"); audioCache[w.id] = a; }
+      a.onerror = function () { speak(w.es); };
+      a.currentTime = 0;
+      var p = a.play();
+      if (p && p.catch) p.catch(function () { speak(w.es); });
+    } catch (e) { speak(w.es); }
+  }
+
   // ── Tabs / routing ───────────────────────────────────────
   var views = {
     home: $("view-home"), learn: $("view-learn"), quiz: $("view-quiz"),
@@ -307,6 +326,8 @@
     $("fc-pron").textContent = w.pron;
     $("fc-en").textContent = w.en;
     $("fc-pron2").textContent = w.es + " · " + w.pron;
+    $("fc-ex-es").textContent = w.ex;
+    $("fc-ex-en").textContent = w.exEn;
 
     $("learn-count").textContent = "Card " + (idx + 1) + " of " + deck.length;
     $("learn-progress").style.width = (idx / deck.length * 100) + "%";
@@ -319,7 +340,7 @@
     if (flipped) {
       $("rate-row").classList.add("show");
       $("flip-row").classList.add("hidden");
-      speak(deck[idx].es);
+      playWord(deck[idx]);
     }
   }
 
@@ -328,8 +349,8 @@
     flip();
   });
   on($("btn-flip"), "click", flip);
-  on($("fc-speak-front"), "click", function (e) { e.stopPropagation(); speak(deck[idx].es); });
-  on($("fc-speak-back"), "click", function (e) { e.stopPropagation(); speak(deck[idx].es); });
+  on($("fc-speak-front"), "click", function (e) { e.stopPropagation(); playWord(deck[idx]); });
+  on($("fc-speak-back"), "click", function (e) { e.stopPropagation(); playWord(deck[idx]); });
 
   document.querySelectorAll(".rate-row .btn").forEach(function (b) {
     on(b, "click", function () {
@@ -402,7 +423,7 @@
     });
     if (ok) { qScore++; }
     else { btn.classList.add("wrong"); }
-    if (askEs) speak(w.es);
+    if (askEs) playWord(w);
     $("quiz-score").textContent = "Score: " + qScore;
     setTimeout(function () { qIdx++; renderQuiz(); }, ok ? 650 : 1200);
   }
@@ -452,8 +473,9 @@
         '<span class="es">' + w.es + "</span>" +
         '<span class="known">' + (isKnown(w) ? "✓" : "") + "</span>" +
         '<span class="en">' + w.en + "</span>" +
-        '<span class="pron">' + w.pron + "</span>";
-      on(el, "click", function () { speak(w.es); });
+        '<span class="pron">' + w.pron + "</span>" +
+        '<span class="wex"><b>' + w.ex + "</b> — " + w.exEn + "</span>";
+      on(el, "click", function () { playWord(w); });
       box.appendChild(el);
     });
   }
