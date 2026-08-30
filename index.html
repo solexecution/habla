@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Hablá — Spanish Conversation Starters</title>
+  <meta name="description" content="Learn 187 high-frequency Spanish words and phrases for starting conversations. Works offline, tracks your progress." />
+  <meta name="theme-color" content="#f4f6fb" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
+  <script>
+    /* Apply saved theme before first paint to avoid a flash of the wrong theme. */
+    (function () {
+      try {
+        var t = localStorage.getItem("habla.theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hablá" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/>
+        </svg>
+      </div>
+      <div class="title">
+        <h1>Hablá</h1>
+        <p>187 Spanish words to get talking · <span id="netpill" class="pill"><span class="dot" id="netdot"></span><span id="nettext">offline-ready</span></span></p>
+      </div>
+      <button class="icon-btn" id="btn-theme" aria-label="Toggle light or dark theme" title="Toggle theme">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </header>
+
+    <!-- ── HOME / progress ── -->
+    <section id="view-home">
+      <div class="stats">
+        <div class="ring">
+          <svg width="84" height="84">
+            <circle cx="42" cy="42" r="36" stroke="var(--line)" stroke-width="8" fill="none"/>
+            <circle id="ring-fg" cx="42" cy="42" r="36" stroke="var(--brand)" stroke-width="8" fill="none"
+                    stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="226"/>
+          </svg>
+          <div class="val" id="ring-val">0%</div>
+        </div>
+        <div class="statgrid">
+          <div class="stat"><b id="stat-known">0</b><span>Learned</span></div>
+          <div class="stat"><b id="stat-due">0</b><span>Due today</span></div>
+          <div class="stat"><b id="stat-streak">0</b><span>Day streak</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="section-title">Recommended session</div>
+        <p style="margin:0 0 14px;color:var(--muted)">Spaced repetition mixes new words with the ones you're about to forget — the fastest proven way to make them stick.</p>
+        <div class="btn-row">
+          <button class="btn" id="btn-start-learn">Start learning</button>
+          <button class="btn secondary" id="btn-start-quiz">Quick quiz</button>
+        </div>
+      </div>
+
+      <div class="section-title">How it works</div>
+      <div class="card">
+        <p style="margin:0 0 8px"><b>1. Flip &amp; rate.</b> See the Spanish, guess, flip, then say how it went — <i>Again / Hard / Good</i>.</p>
+        <p style="margin:0 0 8px"><b>2. Come back tomorrow.</b> Words you rate <i>Good</i> return less often; <i>Again</i> brings them right back.</p>
+        <p style="margin:0"><b>3. Everything saves on your phone.</b> Progress lives in this app and works with no signal. Add it to your home screen from your browser's share menu.</p>
+      </div>
+
+      <footer class="credit">Hablá · offline PWA · 187 conversation starters</footer>
+    </section>
+
+    <!-- ── LEARN ── -->
+    <section id="view-learn" class="hidden">
+      <div class="progressbar"><i id="learn-progress"></i></div>
+      <div class="deck-meta">
+        <span id="learn-count">—</span>
+        <button class="btn ghost" id="learn-restart" style="padding:2px 8px">Restart</button>
+      </div>
+
+      <div id="learn-active">
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-inner">
+            <div class="face front">
+              <span class="cat-chip" id="fc-cat"></span>
+              <div class="es" id="fc-es"></div>
+              <div class="pron" id="fc-pron"></div>
+              <button class="speak" id="fc-speak-front" aria-label="Hear pronunciation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              </button>
+              <div class="hint">Tap to flip</div>
+            </div>
+            <div class="face back">
+              <span class="cat-chip" id="fc-cat2"></span>
+              <div class="en" id="fc-en"></div>
+              <div class="pron" id="fc-pron2"></div>
+              <button class="speak" id="fc-speak-back" aria-label="Hear pronunciation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              </button>
+              <div class="hint">How did you do?</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rate-row" id="rate-row">
+          <button class="btn again" data-grade="again">Again<small>1</small></button>
+          <button class="btn hard" data-grade="hard">Hard<small>2</small></button>
+          <button class="btn good" data-grade="good">Good<small>3</small></button>
+        </div>
+        <div class="btn-row" id="flip-row" style="margin-top:4px">
+          <button class="btn" id="btn-flip">Show answer</button>
+        </div>
+      </div>
+
+      <div id="learn-done" class="empty hidden">
+        <h2>¡Bien hecho! 🎉</h2>
+        <p>You finished this session.</p>
+        <button class="btn" id="btn-learn-again" style="margin-top:8px">Another session</button>
+      </div>
+    </section>
+
+    <!-- ── QUIZ ── -->
+    <section id="view-quiz" class="hidden">
+      <div class="progressbar"><i id="quiz-progress"></i></div>
+      <div class="deck-meta"><span id="quiz-count">—</span><span id="quiz-score">Score: 0</span></div>
+      <div id="quiz-active" class="card">
+        <div class="quiz-q" id="quiz-q"></div>
+        <div class="quiz-sub" id="quiz-sub">Choose the meaning</div>
+        <div class="options" id="quiz-options"></div>
+      </div>
+      <div id="quiz-done" class="empty hidden">
+        <h2 id="quiz-result">Done!</h2>
+        <p id="quiz-detail"></p>
+        <button class="btn" id="btn-quiz-again" style="margin-top:8px">Play again</button>
+      </div>
+    </section>
+
+    <!-- ── BROWSE ── -->
+    <section id="view-browse" class="hidden">
+      <div id="browse-cats">
+        <div class="section-title">All 187 words, by theme</div>
+        <div id="cat-list"></div>
+      </div>
+      <div id="browse-words" class="hidden">
+        <button class="back-link" id="browse-back">‹ All themes</button>
+        <div class="section-title" id="browse-title"></div>
+        <div class="word-list" id="word-list"></div>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS ── -->
+    <section id="view-more" class="hidden">
+      <div class="section-title">Your data</div>
+      <div class="card" style="margin-bottom:16px">
+        <p style="margin:0 0 12px;color:var(--muted)">Progress is stored only on this device. Nothing is uploaded.</p>
+        <div class="btn-row">
+          <button class="btn secondary" id="btn-export">Export</button>
+          <button class="btn secondary" id="btn-reset">Reset progress</button>
+        </div>
+      </div>
+      <div class="section-title">Install</div>
+      <div class="card">
+        <p style="margin:0 0 10px" id="install-text">Install Hablá to your home screen to use it like a native app, fully offline.</p>
+        <button class="btn" id="btn-install" disabled>Add to home screen</button>
+      </div>
+      <footer class="credit">Data v1 · works offline once loaded</footer>
+    </section>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button data-tab="home" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      Home
+    </button>
+    <button data-tab="learn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10"/></svg>
+      Learn
+    </button>
+    <button data-tab="quiz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+      Quiz
+    </button>
+    <button data-tab="browse">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Words
+    </button>
+    <button data-tab="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      More
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- In-page confirm modal (replaces native confirm) -->
+  <div class="modal-scrim" id="modal-scrim" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-body">
+    <div class="modal">
+      <h3 id="modal-title">Reset progress?</h3>
+      <p id="modal-body">This clears every learned word and your streak on this device. It can't be undone.</p>
+      <div class="btn-row">
+        <button class="btn secondary" id="modal-cancel">Cancel</button>
+        <button class="btn danger" id="modal-confirm">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="words.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
