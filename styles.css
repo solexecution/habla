@@ -226,7 +226,7 @@ nav.tabs button.active svg { transform: translateY(-1px) scale(1.06); }
 
 /* ── Flashcard (Learn) ── */
 .deck-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: var(--muted); font-size: .82rem; }
-.flashcard { perspective: 1400px; height: 320px; margin-bottom: 16px; }
+.flashcard { perspective: 1400px; height: 360px; margin-bottom: 16px; }
 .flashcard-inner {
   position: relative; width: 100%; height: 100%;
   transition: transform .55s var(--ease); transform-style: preserve-3d; cursor: pointer;
@@ -237,33 +237,34 @@ nav.tabs button.active svg { transform: translateY(-1px) scale(1.06); }
 .face {
   position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 12px; padding: 28px; text-align: center;
+  gap: 8px; padding: 18px 18px; text-align: center; overflow-y: auto;
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg);
 }
 .face.front { background: linear-gradient(160deg, var(--card), var(--card-hi)); }
+/* Chip and hint sit in normal flow (not absolute) so tall content can never
+   overlap them — long phrases just make the card content taller. */
 .face .cat-chip {
-  position: absolute; top: 16px; left: 16px; font-size: .66rem; text-transform: uppercase;
-  letter-spacing: .06em; font-weight: 700; color: var(--brand-hi); background: var(--brand-tint);
-  padding: 5px 10px; border-radius: 999px;
+  font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+  color: var(--brand-hi); background: var(--brand-tint); padding: 4px 10px; border-radius: 999px; flex: 0 0 auto;
 }
-.face .es { font-size: 2.15rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
-.face .pron { color: var(--muted); font-style: italic; }
-.face .en { font-size: 1.7rem; font-weight: 700; }
+.face .es { font-size: 1.95rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.12; }
+.face .pron { color: var(--muted); font-style: italic; font-size: .9rem; }
+.face .en { font-size: 1.5rem; font-weight: 700; line-height: 1.15; }
 .face .example {
   display: flex; flex-direction: column; gap: 2px; max-width: 100%;
-  padding: 10px 14px; margin-top: 2px; border-radius: 12px;
+  padding: 8px 12px; border-radius: 12px;
   background: var(--brand-tint); border: 1px solid var(--line);
 }
-.face .example .ex-es { font-weight: 600; font-size: 1rem; }
-.face .example .ex-en { color: var(--muted); font-size: .82rem; font-style: italic; }
+.face .example .ex-es { font-weight: 600; font-size: .95rem; }
+.face .example .ex-en { color: var(--muted); font-size: .8rem; font-style: italic; }
 .hook {
   font-size: .82rem; color: var(--muted); line-height: 1.35; max-width: 100%;
   padding: 2px 6px;
 }
 .hook::before { content: "💡 "; }
 .hook:empty { display: none; }
-.face .hook { margin-top: -2px; }
-.face .hint { position: absolute; bottom: 16px; color: var(--muted); font-size: .74rem; }
+.face .hook { margin-top: 0; }
+.face .hint { color: var(--muted); font-size: .72rem; flex: 0 0 auto; }
 .face.back { transform: rotateY(180deg); }
 .speak {
   background: var(--card-hi); border: 1px solid var(--line); color: var(--brand-hi);
